@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
-project(task1)
+project(task2)
 
 set(CMAKE_CXX_STANDARD 20)
 enable_testing()
@@ -13,14 +13,14 @@ FetchContent_Declare(
 
 FetchContent_MakeAvailable(googletest)
 
-add_executable(task1 SimUDuck.cpp)
-add_executable(task1_test test/SimUDuckTests.cpp)
+add_executable(task2 SimUDuck.cpp)
+add_executable(task2_test test/SimUDuckTest.cpp)
 
-target_link_libraries(task1_test
+target_link_libraries(task2_test
         PRIVATE
         GTest::gtest_main
         GTest::gmock_main
 )
 
 include(GoogleTest)
-gtest_discover_tests(task1_test)
+gtest_discover_tests(task2_test)
