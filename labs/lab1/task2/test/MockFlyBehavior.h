@@ -4,7 +4,8 @@
 #include <gmock/gmock.h>
 #include "../lib/Duck/Fly/IFlyBehavior.h"
 
-class MockFlyBehavior final : public IFlyBehavior {
+class MockFlyBehavior final : public IFlyBehavior
+{
 public:
     MOCK_METHOD(void, Fly, (), (override));
     MOCK_METHOD(bool, IsFlying, (), (const, override));
