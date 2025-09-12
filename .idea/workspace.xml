@@ -8,7 +8,7 @@
     <option name="/Default/Housekeeping/GlobalSettingsUpgraded/IsUpgraded/@EntryValue" value="true" type="bool" />
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexedValue" value="true" type="bool" />
     <option name="/Default/Housekeeping/FeatureSuggestion/FeatureSuggestionManager/DisabledSuggesters/=SwitchToGoToActionSuggester/@EntryIndexRemoved" />
-    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="11" type="long" />
+    <option name="/Default/Environment/Hierarchy/GeneratedFilesCacheKey/Timestamp/@EntryValue" value="46" type="long" />
   </component>
   <component name="CMakeProjectFlavorService">
     <option name="flavorId" value="CMakePlainProjectFlavor" />
@@ -19,29 +19,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b7b34bec-3592-490f-b66f-cd8891a15383" name="Changes" comment="добавила файл с выводом функций уточки">
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/CMakeLists.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/SimUDuck.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/Dance/DanceMinuet.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/Dance/DanceNoWay.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/Dance/DanceWaltz.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/Dance/IDanceBehavior.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/DecoyDuck.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/Duck.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/Fly/FlyNoWay.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/Fly/FlyWithWings.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/Fly/IFlyBehavior.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/MallardDuck.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/ModelDuck.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/Quack/IQuackBehavior.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/Quack/MuteQuackBehavior.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/Quack/QuackBehavior.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/Quack/SqueakBehavior.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/RedheadDuck.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/Duck/RubberDuck.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/labs/lab1/task2/lib/DuckFunctions.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-    </list>
+    <list default="true" id="b7b34bec-3592-490f-b66f-cd8891a15383" name="Changes" comment="сделала задание, но проблема с отрисовкой" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -71,7 +49,11 @@
   }
 }</component>
   <component name="HighlightingSettingsPerFile">
+    <setting file="mock://D:/Luniks/uni/ood/labs/lab1/task1/lib/Duck/ModelDuck.h" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/labs/lab1/task1/test/SimUDuckTests.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://D:/Luniks/uni/ood/labs/lab1/task1/test/SimUDuckTests.cpp" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://D:/Luniks/uni/ood/labs/lab1/task2/lib/Duck/ModelDuck.h" root0="SKIP_HIGHLIGHTING" />
+    <setting file="mock://D:/Luniks/uni/ood/labs/lab1/task2/test/MockQuackBehavior.h" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
@@ -93,19 +75,21 @@
     "RunOnceActivity.readMode.enableVisualFormatting": "true",
     "cf.first.check.clang-format": "false",
     "cidr.known.project.marker": "true",
-    "git-widget-placeholder": "1-2",
+    "git-widget-placeholder": "1__4",
     "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "D:/Luniks/uni/ood/labs/lab1/task2",
+    "last_opened_file_path": "D:/Luniks/uni/ood/labs/lab1/task3",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "editor.preferences.tabs",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Luniks\uni\ood\labs\lab1\task3\" />
       <recent name="D:\Luniks\uni\ood\labs\lab1\task2" />
       <recent name="D:\Luniks\uni\ood\labs\lab1\task2\" />
       <recent name="D:\Luniks\uni\ood\labs\lab1" />
@@ -143,8 +127,11 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="C/C++ File.SimUDuckTests.cpp" />
         <item itemvalue="C/C++ File.SimUDuck.cpp" />
         <item itemvalue="C/C++ File.SimUDuckTests.cpp" />
+        <item itemvalue="C/C++ File.SimUDuck.cpp" />
+        <item itemvalue="C/C++ File.SimUDuck.cpp" />
       </list>
     </recent_temporary>
   </component>
@@ -189,7 +176,31 @@
       <option name="project" value="LOCAL" />
       <updated>1757158622763</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="добавила подсчет полетов уточки и кряканье от удовольствия, если она умеет">
+      <option name="closed" value="true" />
+      <created>1757240581236</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1757240581236</updated>
+    </task>
+    <task id="LOCAL-00005" summary="поправила форматирование">
+      <option name="closed" value="true" />
+      <created>1757240891322</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1757240891322</updated>
+    </task>
+    <task id="LOCAL-00006" summary="сделала задание, но проблема с отрисовкой">
+      <option name="closed" value="true" />
+      <created>1757630259402</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1757630259402</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -210,6 +221,9 @@
     <MESSAGE value="init commit" />
     <MESSAGE value="added first lecture notes" />
     <MESSAGE value="добавила файл с выводом функций уточки" />
-    <option name="LAST_COMMIT_MESSAGE" value="добавила файл с выводом функций уточки" />
+    <MESSAGE value="добавила подсчет полетов уточки и кряканье от удовольствия, если она умеет" />
+    <MESSAGE value="поправила форматирование" />
+    <MESSAGE value="сделала задание, но проблема с отрисовкой" />
+    <option name="LAST_COMMIT_MESSAGE" value="сделала задание, но проблема с отрисовкой" />
   </component>
 </project>
