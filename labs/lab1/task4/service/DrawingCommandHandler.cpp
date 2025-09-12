@@ -50,7 +50,7 @@ void DrawingCommandHandler::MoveShape(std::istream& params)
     {
         double doubleDx = stod(dx);
         double doubleDy = stod(dy);
-        m_picture.GetShapeById(id)->Move(doubleDx, doubleDy);
+        m_picture.MoveShape(id, doubleDx, doubleDy);
     }
     catch (std::exception const& e)
     {
@@ -99,7 +99,7 @@ void DrawingCommandHandler::ChangeColor(std::istream& params)
     }
 
     shapes::Color colorValue = std::stoul(color, nullptr, 16);
-    m_picture.GetShapeById(id)->SetColor(colorValue);
+    m_picture.ChangeColor(id, colorValue);
 
 }
 
