@@ -42,11 +42,7 @@ public:
   void Draw(gfx::ICanvas& canvas, Color color) const override
   {
     canvas.SetColor(color);
-    canvas.MoveTo(m_topLeftPoint.m_x, m_topLeftPoint.m_y);
-    canvas.LineTo(m_topLeftPoint.m_x + m_width, m_topLeftPoint.m_y);
-    canvas.LineTo(m_topLeftPoint.m_x + m_width, m_topLeftPoint.m_y + m_height);
-    canvas.LineTo(m_topLeftPoint.m_x, m_topLeftPoint.m_y + m_height);
-    canvas.LineTo(m_topLeftPoint.m_x, m_topLeftPoint.m_y);
+    canvas.DrawRectangle(m_topLeftPoint, m_width, m_height);
   }
 
 private:

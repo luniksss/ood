@@ -58,10 +58,7 @@ public:
   void Draw(gfx::ICanvas& canvas, Color color) const override
   {
     canvas.SetColor(color);
-    canvas.MoveTo(m_vertex1.m_x, m_vertex1.m_y);
-    canvas.LineTo(m_vertex2.m_x, m_vertex2.m_y);
-    canvas.LineTo(m_vertex3.m_x, m_vertex3.m_y);
-    canvas.LineTo(m_vertex1.m_x, m_vertex1.m_y);
+    canvas.DrawTriangle(m_vertex1, m_vertex2, m_vertex3);
   }
 
 private:

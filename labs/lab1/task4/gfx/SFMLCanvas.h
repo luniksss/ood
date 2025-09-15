@@ -67,7 +67,7 @@ public:
     m_texture.draw(sfText);
   }
 
-  void DrawRectangle(shapes::Point topLeft, double width, double height) override
+  void DrawRectangle(Point topLeft, double width, double height) override
   {
     sf::RectangleShape rectangle(sf::Vector2f(static_cast<float>(width), static_cast<float>(height)));
     rectangle.setPosition(static_cast<float>(topLeft.m_x), static_cast<float>(topLeft.m_y));
@@ -76,7 +76,7 @@ public:
     m_texture.draw(rectangle);
   }
 
-  void FillTriangle(shapes::Point vertex1, shapes::Point vertex2, shapes::Point vertex3) override
+  void DrawTriangle(Point vertex1, Point vertex2, Point vertex3) override
   {
     sf::VertexArray triangle(sf::Triangles, 3);
 
@@ -109,7 +109,7 @@ private:
   sf::RenderWindow& m_window;
   sf::RenderTexture m_texture;
   sf::Color m_color = sf::Color::White;
-  shapes::Point m_currentPoint;
+  Point m_currentPoint;
 
   static sf::Color uint32ToSFMLColor(Color color)
   {
@@ -120,7 +120,7 @@ private:
   };
   }
 
-  void drawLine(shapes::Point from, shapes::Point to)
+  void drawLine(Point from, Point to)
   {
     const sf::Vertex line[] = {
       {sf::Vector2f(static_cast<float>(from.m_x), static_cast<float>(from.m_y)), m_color},

@@ -1,0 +1,10 @@
+домик:
+    AddShape 1 #ff0000 rectangle 200 200 400 400
+    AddShape 2 #ff0f0f rectangle 175.0 75.0 50.0 50.0
+    DrawPicture
+    ChangeColor 2 #00ff00
+    DrawShape 2
+    AddShape 3 #0000ff triangle 200.0 200.0 400.0 100.0 600.0 200.0
+    DrawShape 3
+    ChangeShape 2 circle 200 100 50
+    AddShape 5 #ff00ff rectangle 300.0 300.0 200.0 200.0
