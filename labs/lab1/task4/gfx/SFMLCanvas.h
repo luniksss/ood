@@ -20,12 +20,13 @@ public:
 
   void MoveTo(double x, double y) override
   {
-    m_currentPoint = { x, y };
+    const Point newPoint(x, y);
+    m_currentPoint = newPoint;
   }
 
   void LineTo(double x, double y) override
   {
-    shapes::Point destinationPoint = { x, y };
+    const Point destinationPoint(x, y);
     drawLine(m_currentPoint, destinationPoint);
     m_currentPoint = destinationPoint;
   }
@@ -36,7 +37,6 @@ public:
     ellipse.setPosition(cx - rx, cy - ry);
     ellipse.setScale(rx, ry);
     ellipse.setFillColor(m_color);
-    ellipse.setOutlineThickness(2);
     m_window.draw(ellipse);
   }
 
@@ -67,7 +67,6 @@ public:
     sf::RectangleShape rectangle(sf::Vector2f(static_cast<float>(width), static_cast<float>(height)));
     rectangle.setPosition(static_cast<float>(topLeft.m_x), static_cast<float>(topLeft.m_y));
     rectangle.setFillColor(m_color);
-    rectangle.setOutlineThickness(2);
 
     m_window.draw(rectangle);
   }
@@ -89,21 +88,20 @@ public:
 private:
   sf::RenderWindow& m_window;
   sf::Color m_color = sf::Color::Black;
-  shapes::Point m_currentPoint = { 0, 0 };
+  shapes::Point m_currentPoint;
 
-  sf::Color uint32ToSFMLColor(Color color)
+  static sf::Color uint32ToSFMLColor(Color color)
   {
     return {
       static_cast<sf::Uint8>((color >> 16) & 0xFF),  // R
-      static_cast<sf::Uint8>((color >> 16) & 0xFF),  // G
-      static_cast<sf::Uint8>((color >> 8) & 0xFF),   // B
-      static_cast<sf::Uint8>(color & 0xFF),          // A
-    };
+      static_cast<sf::Uint8>((color >> 8) & 0xFF),   // G
+      static_cast<sf::Uint8>(color & 0xFF),          // B
+  };
   }
 
   void drawLine(shapes::Point from, shapes::Point to)
   {
-    sf::Vertex line[] = {
+    const sf::Vertex line[] = {
       {sf::Vector2f(static_cast<float>(from.m_x), static_cast<float>(from.m_y)), m_color},
       {sf::Vector2f(static_cast<float>(to.m_x), static_cast<float>(to.m_y)), m_color}
     };

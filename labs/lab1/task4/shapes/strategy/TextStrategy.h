@@ -30,7 +30,7 @@ public:
     {
         return std::to_string(m_topLeftPoint.m_x)
         + " " + std::to_string(m_topLeftPoint.m_y)
-        + " " + std::to_string(m_size);
+        + " " + std::to_string(m_size)
         + " " + m_text;
     }
 

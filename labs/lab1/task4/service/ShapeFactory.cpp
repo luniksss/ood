@@ -41,7 +41,7 @@ std::unique_ptr<shapes::CircleStrategy> ShapeFactory::createCircle(std::istream&
         throw std::invalid_argument("Invalid circle parameters");
     }
 
-    shapes::Point centerPoint = { centerX, centerY };
+    shapes::Point centerPoint(centerX, centerY);
     return std::make_unique<shapes::CircleStrategy>(centerPoint, radius);
 }
 
@@ -53,8 +53,8 @@ std::unique_ptr<shapes::LineStrategy> ShapeFactory::createLine(std::istream& iss
         throw std::invalid_argument("Invalid line segment coordinates");
     }
 
-    shapes::Point startPoint = { startX, endX };
-    shapes::Point endPoint = { startY, endY };
+    shapes::Point startPoint(startX, endX);
+    shapes::Point endPoint(startY, endY);
 
     return std::make_unique<shapes::LineStrategy>(startPoint, endPoint);
 }
@@ -67,7 +67,7 @@ std::unique_ptr<shapes::RectangleStrategy> ShapeFactory::createRectangle(std::is
         throw std::invalid_argument("Invalid rectangle coordinates");
     }
 
-    shapes::Point leftTopPoint = { leftTopX, leftTopY };
+    shapes::Point leftTopPoint(leftTopX, leftTopY);
     return std::make_unique<shapes::RectangleStrategy>(leftTopPoint, width, height);
 }
 
@@ -80,7 +80,7 @@ std::unique_ptr<shapes::TextStrategy> ShapeFactory::createText(std::istream& iss
         throw std::invalid_argument("Invalid rectangle coordinates");
     }
 
-    shapes::Point leftTopPoint = { leftTopX, leftTopY };
+    shapes::Point leftTopPoint(leftTopX, leftTopY);
     return std::make_unique<shapes::TextStrategy>(leftTopPoint, fontSize, std::move(text));
 }
 
@@ -92,9 +92,9 @@ std::unique_ptr<shapes::TriangleStrategy> ShapeFactory::createTriangle(std::istr
         throw std::invalid_argument("Invalid number of triangle coordinates");
     }
 
-    shapes::Point vertex1 = { vertex1X, vertex1Y };
-    shapes::Point vertex2 = { vertex2X, vertex2Y };
-    shapes::Point vertex3 = { vertex3X, vertex3Y };
+    shapes::Point vertex1(vertex1X, vertex1Y);
+    shapes::Point vertex2(vertex2X, vertex2Y);
+    shapes::Point vertex3(vertex3X, vertex3Y);
 
     return std::make_unique<shapes::TriangleStrategy>(vertex1, vertex2, vertex3);
 }

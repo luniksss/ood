@@ -16,8 +16,6 @@ std::vector<std::string> Picture::List()
             + " "
             + shape.second->GetName()
             + " "
-            + shape.second->GetColor()
-            + " "
             + shape.second->GetId()
             + " "
             + shape.second->GetShapeInfo()
