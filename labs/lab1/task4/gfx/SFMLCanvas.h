@@ -10,7 +10,12 @@ namespace gfx
 class SFMLCanvas: public ICanvas
 {
 public:
-  explicit SFMLCanvas(sf::RenderWindow& window) : m_window(window) {}
+  explicit SFMLCanvas(sf::RenderWindow& window) : m_window(window)
+  {
+    m_texture.create(window.getSize().x, window.getSize().y);
+    m_texture.clear(sf::Color::Transparent);
+    m_texture.display();
+  }
 
   void SetColor(const Color color) override
   {
@@ -37,7 +42,7 @@ public:
     ellipse.setPosition(cx - rx, cy - ry);
     ellipse.setScale(rx, ry);
     ellipse.setFillColor(m_color);
-    m_window.draw(ellipse);
+    m_texture.draw(ellipse);
   }
 
   void DrawText(double left, double top, double fontSize, const std::string& text) override
@@ -46,7 +51,7 @@ public:
     static bool fontLoaded = false;
     if (!fontLoaded)
     {
-      if (!font.loadFromFile("./font/Merriweather-Regular.ttf"))
+      if (!font.loadFromFile(FONT_FILE_PATH))
       {
         return;
       }
@@ -59,7 +64,7 @@ public:
     sfText.setCharacterSize(static_cast<unsigned int>(fontSize));
     sfText.setFillColor(m_color);
     sfText.setPosition(static_cast<float>(left), static_cast<float>(top));
-    m_window.draw(sfText);
+    m_texture.draw(sfText);
   }
 
   void DrawRectangle(shapes::Point topLeft, double width, double height) override
@@ -68,7 +73,7 @@ public:
     rectangle.setPosition(static_cast<float>(topLeft.m_x), static_cast<float>(topLeft.m_y));
     rectangle.setFillColor(m_color);
 
-    m_window.draw(rectangle);
+    m_texture.draw(rectangle);
   }
 
   void FillTriangle(shapes::Point vertex1, shapes::Point vertex2, shapes::Point vertex3) override
@@ -82,12 +87,28 @@ public:
     triangle[2].position = sf::Vector2f(static_cast<float>(vertex3.m_x), static_cast<float>(vertex3.m_y));
     triangle[2].color = m_color;
 
-    m_window.draw(triangle);
+    m_texture.draw(triangle);
+  }
+
+  void Display() override
+  {
+    sf::Event event{};
+    while (m_window.pollEvent(event))
+    {
+      if (event.type == sf::Event::Closed)
+        m_window.close();
+    }
+    m_texture.display();
+    sf::Sprite sprite(m_texture.getTexture());
+    m_window.draw(sprite);
+    m_window.display();
   }
 
 private:
+  const char* FONT_FILE_PATH = R"(D:\Luniks\uni\ood\labs\lab1\task4\gfx\font\Merriweather-Regular.ttf)";
   sf::RenderWindow& m_window;
-  sf::Color m_color = sf::Color::Black;
+  sf::RenderTexture m_texture;
+  sf::Color m_color = sf::Color::White;
   shapes::Point m_currentPoint;
 
   static sf::Color uint32ToSFMLColor(Color color)
@@ -105,7 +126,7 @@ private:
       {sf::Vector2f(static_cast<float>(from.m_x), static_cast<float>(from.m_y)), m_color},
       {sf::Vector2f(static_cast<float>(to.m_x), static_cast<float>(to.m_y)), m_color}
     };
-    m_window.draw(line, 2, sf::Lines);
+    m_texture.draw(line, 2, sf::Lines);
   }
 };
 }

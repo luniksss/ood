@@ -82,6 +82,7 @@ void DrawingCommandHandler::DrawShape(std::istream& params)
     }
 
     m_picture.DrawShape(id, m_canvas);
+    m_canvas.Display();
 }
 
 void DrawingCommandHandler::ChangeColor(std::istream& params)
@@ -126,6 +127,7 @@ void DrawingCommandHandler::ChangeShape(std::istream& params)
 void DrawingCommandHandler::DrawPicture()
 {
     m_picture.DrawPicture(m_canvas);
+    m_canvas.Display();
 }
 
 void DrawingCommandHandler::MovePicture(std::istream& params)

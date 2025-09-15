@@ -17,6 +17,7 @@ namespace gfx
     virtual void DrawText(double left, double top, double fontSize, const std::string& text) = 0;
     virtual void DrawRectangle(shapes::Point topLeft, double width, double height) = 0;
     virtual void FillTriangle(shapes::Point vertex1, shapes::Point vertex2, shapes::Point vertex3) = 0;
+    virtual void Display() = 0;
   };
 }
 
