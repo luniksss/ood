@@ -1,6 +1,6 @@
 #ifndef COBSERVABLE_H
 #define COBSERVABLE_H
-#include "IObservable.h"
+#include "../IObserver.h"
 #include <set>
 #include <vector>
 #include <map>
@@ -32,7 +32,7 @@ public:
             std::vector<ObserverType*> observersCopy(observersSet.begin(), observersSet.end());
             for (auto observer : observersCopy)
             {
-                observer->Update(data);
+                observer->Update(data, this);
             }
         }
     }
