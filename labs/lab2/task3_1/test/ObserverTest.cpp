@@ -4,13 +4,13 @@
 #include "../Observable/CWeatherData.h"
 #include <vector>
 
-class TestObserver : public IObserver<SWeatherInfo>
+class TestObserver final : public IObserver<SWeatherInfo>
 {
 public:
     std::vector<int> updates;
     int id;
 
-    TestObserver(int id_) : id(id_) {}
+    explicit TestObserver(const int id_) : id(id_) {}
 
     void Update(SWeatherInfo const& data) override
     {
@@ -36,8 +36,6 @@ TEST(CObservablePriorityTest, NotificationOrderAndNoDuplicates)
     ASSERT_EQ(obs1.updates.size(), 1);
     ASSERT_EQ(obs2.updates.size(), 1);
     ASSERT_EQ(obs3.updates.size(), 1);
-
-    std::vector<int> expectedOrder = {1, 2, 3};
 
     weatherData.RemoveObserver(obs2);
     obs1.updates.clear();
