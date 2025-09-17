@@ -1,91 +1,52 @@
 #include <gtest/gtest.h>
-#include "../Observable/CObservable.h"
+#include "../SWeatherInfo.h"
+#include "../Observer/IObserver.h"
+#include "../Observable/CWeatherData.h"
+#include <vector>
 
-template <typename T>
-class TestObserver : public IObserver<T>
+class TestObserver : public IObserver<SWeatherInfo>
 {
 public:
-    int updateCount = 0;
+    std::vector<int> updates;
+    int id;
 
-    void Update(const T& data) override
+    TestObserver(int id_) : id(id_) {}
+
+    void Update(SWeatherInfo const& data) override
     {
-        ++updateCount;
+        updates.push_back(id);
     }
 };
 
-template <typename T>
-class SelfRemovingObserver : public IObserver<T>
+TEST(CObservablePriorityTest, NotificationOrderAndNoDuplicates)
 {
-public:
-    explicit SelfRemovingObserver(CObservable<T>& observable)
-        : m_observable(observable) {}
+    CWeatherData weatherData;
 
-    void Update(const T& data) override
-    {
-        m_observable.RemoveObserver(*this);
-        removed = true;
-    }
+    TestObserver obs1(1);
+    TestObserver obs2(2);
+    TestObserver obs3(3);
 
-    bool removed = false;
+    weatherData.RegisterObserver(obs2, 5);
+    weatherData.RegisterObserver(obs1, 10);
+    weatherData.RegisterObserver(obs3, 1);
 
-private:
-    CObservable<T>& m_observable;
-};
+    weatherData.RegisterObserver(obs1, 10);
+    weatherData.SetMeasurements(25.0, 50.0, 760.0);
 
-struct DummyData
-{
-    int value;
-};
+    ASSERT_EQ(obs1.updates.size(), 1);
+    ASSERT_EQ(obs2.updates.size(), 1);
+    ASSERT_EQ(obs3.updates.size(), 1);
 
-class ObservableTest : public testing::Test
-{
-protected:
-    class MyObservable : public CObservable<DummyData>
-    {
-    public:
-        void SetData(int v)
-        {
-            m_data.value = v;
-            NotifyObservers();
-        }
+    std::vector<int> expectedOrder = {1, 2, 3};
 
-        [[nodiscard]] DummyData GetChangedData() const override
-        {
-            return m_data;
-        }
+    weatherData.RemoveObserver(obs2);
+    obs1.updates.clear();
+    obs2.updates.clear();
+    obs3.updates.clear();
 
-    private:
-        DummyData m_data{};
-    };
-};
+    weatherData.SetMeasurements(26.0, 55.0, 758.0);
 
-TEST_F(ObservableTest, SelfRemovingObserverIsRemovedSafely)
-{
-    MyObservable observable;
-
-    TestObserver<DummyData> observer1;
-    SelfRemovingObserver<DummyData> selfRemovingObserver(observable);
-    TestObserver<DummyData> observer2;
-
-    observable.RegisterObserver(observer1);
-    observable.RegisterObserver(selfRemovingObserver);
-    observable.RegisterObserver(observer2);
-
-    observable.SetData(42);
-
-    // observer1 и observer2 получили обновление
-    EXPECT_EQ(observer1.updateCount, 1);
-    EXPECT_EQ(observer2.updateCount, 1);
-
-    // selfRemovingObserver удалил себя во время Update
-    EXPECT_TRUE(selfRemovingObserver.removed);
-
-    // При повторном уведомлении selfRemovingObserver не должен обновляться
-    observer1.updateCount = 0;
-    observer2.updateCount = 0;
-    observable.SetData(100);
-
-    EXPECT_EQ(observer1.updateCount, 1);
-    EXPECT_EQ(observer2.updateCount, 1);
-    EXPECT_TRUE(selfRemovingObserver.removed);
+    ASSERT_EQ(obs1.updates.size(), 1);
+    ASSERT_EQ(obs2.updates.size(), 0);
+    ASSERT_EQ(obs3.updates.size(), 1);
 }

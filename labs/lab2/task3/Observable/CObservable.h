@@ -3,6 +3,7 @@
 #include "IObservable.h"
 #include <set>
 #include <vector>
+#include <map>
 
 template <class T>
 class CObservable : public IObservable<T>
@@ -10,25 +11,45 @@ class CObservable : public IObservable<T>
 public:
     typedef IObserver<T> ObserverType;
 
-    void RegisterObserver(ObserverType & observer) override
+    void RegisterObserver(ObserverType & observer, int priority) override
     {
-        m_observers.insert(&observer);
+        for (const auto& [prio, observersSet] : m_observers)
+        {
+            if (observersSet.find(&observer) != observersSet.end())
+            {
+                return;
+            }
+        }
+
+        m_observers[priority].insert(&observer);
     }
 
     void NotifyObservers() override
     {
         T data = GetChangedData();
-        std::vector<ObserverType*> observersCopy(m_observers.begin(), m_observers.end());
-
-        for (auto & observer : observersCopy)
+        for (const auto& [priority, observersSet] : m_observers)
         {
-            observer->Update(data);
+            std::vector<ObserverType*> observersCopy(observersSet.begin(), observersSet.end());
+            for (auto observer : observersCopy)
+            {
+                observer->Update(data);
+            }
         }
     }
 
     void RemoveObserver(ObserverType & observer) override
     {
-        m_observers.erase(&observer);
+        for (auto it = m_observers.begin(); it != m_observers.end(); ++it)
+        {
+            if (it->second.erase(&observer) > 0)
+            {
+                if (it->second.empty())
+                {
+                    m_observers.erase(it);
+                }
+                break;
+            }
+        }
     }
 
 protected:
@@ -37,7 +58,7 @@ protected:
     virtual T GetChangedData() const = 0;
 
 private:
-    std::set<ObserverType *> m_observers;
+    std::map<int, std::set<ObserverType*>, std::greater<int>> m_observers;
 };
 
 #endif //COBSERVABLE_H

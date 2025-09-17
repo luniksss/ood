@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.30)
-project(task2)
+project(task3)
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ./../bin)
@@ -29,13 +29,13 @@ set(TEST_SOURCE_FILES
         test/ObserverTest.cpp
 )
 
-add_executable(task2 ${SOURCE_FILES})
+add_executable(task3 ${SOURCE_FILES})
 
-add_executable(task2_test ${TEST_SOURCE_FILES})
-target_link_libraries(task2_test
+add_executable(task3_test ${TEST_SOURCE_FILES})
+target_link_libraries(task3_test
         PRIVATE
         GTest::gtest_main
 )
 enable_testing()
 include(GoogleTest)
-gtest_discover_tests(task2_test)
+gtest_discover_tests(task3_test)
