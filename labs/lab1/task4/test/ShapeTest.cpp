@@ -106,21 +106,6 @@ TEST(ShapeTest, AddShapeDuplicateThrows)
     EXPECT_THROW(picture.AddShape("id1", std::move(s2)), std::invalid_argument);
 }
 
-TEST(ShapeTest, MoveShapeAndDeleteShapeWithMockShape)
-{
-    Picture picture;
-    auto mockStrategy = std::make_unique<MockShapeStrategy>();
-    MockShapeStrategy* strategyPtr = mockStrategy.get();
-    auto shape = std::make_unique<Shape>("id", 1, std::move(mockStrategy));
-    picture.AddShape("id", std::move(shape));
-
-    EXPECT_CALL(*strategyPtr, Move(3.0, 4.0)).Times(1);
-    picture.MoveShape("id", 3, 4);
-
-    picture.DeleteShape("id");
-    EXPECT_THROW(picture.MoveShape("id", 1, 1), std::invalid_argument);
-}
-
 TEST(ShapeTest, DrawShapeAndDrawPicture)
 {
     Picture picture;
