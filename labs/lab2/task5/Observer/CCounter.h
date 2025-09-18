@@ -9,7 +9,7 @@
 class CCounter
 {
 public:
-    void ProcessData(double data)
+    void ProcessData(const double data)
     {
         if (m_minData > data)
         {
