@@ -18,17 +18,17 @@ public:
           , m_picture(picture)
     {}
 
-    void List();
-    void AddShape(std::istream& params);
-    void MoveShape(std::istream& params);
-    void DeleteShape(std::istream& params);
-    void DrawShape(std::istream& params);
+    void List() const;
+    void AddShape(std::istream& params) const;
+    void MoveShape(std::istream& params) const;
+    void DeleteShape(std::istream& params) const;
+    void DrawShape(std::istream& params) const;
 
-    void ChangeColor(std::istream& params);
-    void ChangeShape(std::istream& params);
+    void ChangeColor(std::istream& params) const;
+    void ChangeShape(std::istream& params) const;
 
-    void DrawPicture();
-    void MovePicture(std::istream& params);
+    void DrawPicture() const;
+    void MovePicture(std::istream& params) const;
 
 
 private:

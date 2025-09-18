@@ -2,7 +2,7 @@
 #include "../shapes/strategy/IShapeStrategy.h"
 #include "ShapeFactory.h"
 
-void DrawingCommandHandler::List()
+void DrawingCommandHandler::List() const
 {
     for (auto const& shapeInfo : m_picture.List())
     {
@@ -10,7 +10,7 @@ void DrawingCommandHandler::List()
     }
 }
 
-void DrawingCommandHandler::AddShape(std::istream& params)
+void DrawingCommandHandler::AddShape(std::istream& params) const
 {
     std::string id, color;
     params >> id >> color;
@@ -22,7 +22,8 @@ void DrawingCommandHandler::AddShape(std::istream& params)
     try
     {
         auto strategy = ShapeFactory::CreateShape(params);
-        if (!color.empty() && color[0] == '#') {
+        if (!color.empty() && color[0] == '#')
+        {
             color = color.substr(1);
         }
 
@@ -36,7 +37,7 @@ void DrawingCommandHandler::AddShape(std::istream& params)
     }
 }
 
-void DrawingCommandHandler::MoveShape(std::istream& params)
+void DrawingCommandHandler::MoveShape(std::istream& params) const
 {
     std::string id, dx, dy;
     params >> id >> dx >> dy;
@@ -48,8 +49,8 @@ void DrawingCommandHandler::MoveShape(std::istream& params)
 
     try
     {
-        double doubleDx = stod(dx);
-        double doubleDy = stod(dy);
+        const double doubleDx = stod(dx);
+        const double doubleDy = stod(dy);
         m_picture.MoveShape(id, doubleDx, doubleDy);
     }
     catch (std::exception const& e)
@@ -58,7 +59,7 @@ void DrawingCommandHandler::MoveShape(std::istream& params)
     }
 }
 
-void DrawingCommandHandler::DeleteShape(std::istream& params)
+void DrawingCommandHandler::DeleteShape(std::istream& params) const
 {
     std::string id;
     params >> id;
@@ -71,7 +72,7 @@ void DrawingCommandHandler::DeleteShape(std::istream& params)
     m_picture.DeleteShape(id);
 }
 
-void DrawingCommandHandler::DrawShape(std::istream& params)
+void DrawingCommandHandler::DrawShape(std::istream& params) const
 {
     std::string id;
     params >> id;
@@ -85,7 +86,7 @@ void DrawingCommandHandler::DrawShape(std::istream& params)
     m_canvas.Display();
 }
 
-void DrawingCommandHandler::ChangeColor(std::istream& params)
+void DrawingCommandHandler::ChangeColor(std::istream& params) const
 {
     std::string id, color;
     params >> id >> color;
@@ -95,16 +96,17 @@ void DrawingCommandHandler::ChangeColor(std::istream& params)
         throw std::invalid_argument("invalid command arguments");
     }
 
-    if (!color.empty() && color[0] == '#') {
+    if (!color.empty() && color[0] == '#')
+    {
         color = color.substr(1);
     }
 
-    shapes::Color colorValue = std::stoul(color, nullptr, 16);
+    const shapes::Color colorValue = std::stoul(color, nullptr, 16);
     m_picture.ChangeColor(id, colorValue);
 
 }
 
-void DrawingCommandHandler::ChangeShape(std::istream& params)
+void DrawingCommandHandler::ChangeShape(std::istream& params) const
 {
     std::string id;
     params >> id;
@@ -124,13 +126,13 @@ void DrawingCommandHandler::ChangeShape(std::istream& params)
     }
 }
 
-void DrawingCommandHandler::DrawPicture()
+void DrawingCommandHandler::DrawPicture() const
 {
     m_picture.DrawPicture(m_canvas);
     m_canvas.Display();
 }
 
-void DrawingCommandHandler::MovePicture(std::istream& params)
+void DrawingCommandHandler::MovePicture(std::istream& params) const
 {
     std::string dxStr, dyStr;
     params >> dxStr >> dyStr;
@@ -142,8 +144,8 @@ void DrawingCommandHandler::MovePicture(std::istream& params)
 
     try
     {
-        double dx = stod(dxStr);
-        double dy = stod(dyStr);
+        const double dx = stod(dxStr);
+        const double dy = stod(dyStr);
         m_picture.MovePicture(dx, dy);
     }
     catch (std::exception const& e)

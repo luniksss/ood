@@ -13,8 +13,8 @@ public:
     virtual ~IShapeStrategy() = default;
 
     virtual void Move(double dx, double dy) = 0;
-    virtual std::string ShowInfo() const = 0;
-    virtual std::string GetShapeName() const = 0;
+    [[nodiscard]] virtual std::string ShowInfo() const = 0;
+    [[nodiscard]] virtual std::string GetShapeName() const = 0;
     virtual void Draw(gfx::ICanvas& canvas, Color color) const = 0;
 };
 }

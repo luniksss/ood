@@ -3,19 +3,24 @@
 int DrawingController::StartDrawing()
 {
     std::string commandLine;
-    while (getline(m_in, commandLine)) {
+    while (getline(m_in, commandLine))
+    {
         std::istringstream input(commandLine);
         std::string command;
         input >> command;
 
-        if (command.empty()) {
+        if (command.empty())
+        {
             continue;
         }
 
         auto it = m_commands.find(command);
-        if (it != m_commands.end()) {
+        if (it != m_commands.end())
+        {
             it->second(input);
-        } else {
+        }
+        else
+        {
             return 1;
         }
     }

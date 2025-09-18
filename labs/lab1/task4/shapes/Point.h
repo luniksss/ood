@@ -6,7 +6,7 @@ namespace shapes
 class Point
 {
 public:
-    Point(double x = 0.0, double y = 0.0)
+    explicit Point(const double x = 0.0, const double y = 0.0)
         : m_x(x)
         , m_y(y)
     {

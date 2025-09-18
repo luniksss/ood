@@ -10,26 +10,26 @@ namespace shapes
 class Picture
 {
 public:
-    std::vector<std::string> List();
+    [[nodiscard]] std::vector<std::string> List() const;
     void AddShape(const std::string& id, std::unique_ptr<Shape> shape);
-    void MoveShape(const std::string& id, double dx, double dy);
+    void MoveShape(const std::string& id, double dx, double dy) const;
     void DeleteShape(const std::string &id);
-    void DrawShape(const std::string& id, gfx::ICanvas &canvas);
+    void DrawShape(const std::string& id, gfx::ICanvas &canvas) const;
 
-    void ChangeColor(const std::string& id, Color color);
-    void ChangeShape(const std::string &id, std::unique_ptr<IShapeStrategy> newShapeStrategy);
+    void ChangeColor(const std::string& id, Color color) const;
+    void ChangeShape(const std::string &id, std::unique_ptr<IShapeStrategy> newShapeStrategy) const;
 
-    void DrawPicture(gfx::ICanvas &canvas);
-    void MovePicture(double dx, double dy);
+    void DrawPicture(gfx::ICanvas &canvas) const;
+    void MovePicture(double dx, double dy) const;
 
-    std::vector<std::string> GetShapeIds() const
+    [[nodiscard]] std::vector<std::string> GetShapeIds() const
     {
         return m_shapesId;
     }
 
-    std::map<std::string, std::unique_ptr<Shape>> GetShapes()
+    std::map<std::string, std::unique_ptr<Shape>>& GetShapes()
     {
-        return std::move(m_shapeList);
+        return m_shapeList;
     }
 private:
     std::vector<std::string> m_shapesId = {};

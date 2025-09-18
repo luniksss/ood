@@ -10,43 +10,43 @@ namespace shapes
 class Shape
 {
 public:
-    Shape(std::string id, uint32_t color, std::unique_ptr<IShapeStrategy> shapeStrategy)
+    Shape(std::string id, const uint32_t color, std::unique_ptr<IShapeStrategy> shapeStrategy)
       : m_id(std::move(id))
       , m_color(color)
       , m_shapeStrategy(std::move(shapeStrategy))
     {}
 
-    void Move(double dx, double dy)
+    void Move(const double dx, const double dy) const
     {
-    m_shapeStrategy->Move(dx, dy);
+        m_shapeStrategy->Move(dx, dy);
     }
 
-    std::string GetId() const
+    [[nodiscard]] std::string GetId() const
     {
-    return m_id;
+        return m_id;
     }
 
-    std::string GetName() const
+    [[nodiscard]] std::string GetName() const
     {
-    return m_shapeStrategy->GetShapeName();
+        return m_shapeStrategy->GetShapeName();
     }
 
-    Color GetColor() const
+    [[nodiscard]] Color GetColor() const
     {
-    return m_color;
+        return m_color;
     }
 
-    std::string GetShapeInfo() const
+    [[nodiscard]] std::string GetShapeInfo() const
     {
-      return m_shapeStrategy->ShowInfo();
+        return m_shapeStrategy->ShowInfo();
     }
 
-    void Draw(gfx::ICanvas& canvas)
+    void Draw(gfx::ICanvas& canvas) const
     {
         m_shapeStrategy->Draw(canvas, m_color);
     }
 
-    void SetColor(Color color)
+    void SetColor(const Color color)
     {
         m_color = color;
     }

@@ -9,43 +9,43 @@ namespace shapes
 class CircleStrategy: public IShapeStrategy
 {
 public:
-  CircleStrategy(Point center, double radius)
-    : m_centerPoint(center),
-    m_radius(radius)
-  {
-      if (radius <= 0)
-      {
-          throw std::invalid_argument("Invalid radius");
-      }
-  };
+    CircleStrategy(const Point center, const double radius)
+      : m_centerPoint(center),
+      m_radius(radius)
+    {
+        if (radius <= 0)
+        {
+            throw std::invalid_argument("Invalid radius");
+        }
+    };
 
-  void Move(double dx, double dy) override
-  {
-    m_centerPoint.m_x += dx;
-    m_centerPoint.m_y += dy;
-  }
+    void Move(const double dx, const double dy) override
+    {
+        m_centerPoint.m_x += dx;
+        m_centerPoint.m_y += dy;
+    }
 
-  std::string ShowInfo() const override
-  {
-    return std::to_string(m_centerPoint.m_x)
-    + " " + std::to_string(m_centerPoint.m_y)
-    + " " + std::to_string(m_radius);
-  }
+    [[nodiscard]] std::string ShowInfo() const override
+    {
+        return std::to_string(m_centerPoint.m_x)
+        + " " + std::to_string(m_centerPoint.m_y)
+        + " " + std::to_string(m_radius);
+    }
 
-  std::string GetShapeName() const override
-  {
-    return m_name;
-  }
+    [[nodiscard]] std::string GetShapeName() const override
+    {
+        return m_name;
+    }
 
-  void Draw(gfx::ICanvas& canvas, Color color) const override
-  {
-    canvas.SetColor(color);
-    canvas.DrawEllipse(m_centerPoint.m_x, m_centerPoint.m_y, m_radius, m_radius);
-  }
+    void Draw(gfx::ICanvas& canvas, Color color) const override
+    {
+        canvas.SetColor(color);
+        canvas.DrawEllipse(m_centerPoint.m_x, m_centerPoint.m_y, m_radius, m_radius);
+    }
 private:
-  const std::string m_name = "circle";
-  Point m_centerPoint;
-  double m_radius;
+    const std::string m_name = "circle";
+    Point m_centerPoint;
+    double m_radius;
 };
 }
 

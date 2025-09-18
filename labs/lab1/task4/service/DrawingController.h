@@ -1,7 +1,6 @@
 #ifndef DRAWINGCONTROLLER_H
 #define DRAWINGCONTROLLER_H
 
-#include <iostream>
 #include "DrawingCommandHandler.h"
 #include "../gfx/ICanvas.h"
 

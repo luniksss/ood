@@ -4,7 +4,7 @@
 using namespace shapes;
 using namespace gfx;
 
-std::vector<std::string> Picture::List()
+std::vector<std::string> Picture::List() const
 {
     std::vector<std::string> result;
     int counter = 1;
@@ -37,15 +37,15 @@ void Picture::AddShape(const std::string& id, std::unique_ptr<Shape> shape)
     m_shapesId.push_back(id);
 }
 
-void Picture::MoveShape(const std::string& id, double x, double y)
+void Picture::MoveShape(const std::string& id, const double dx, const double dy) const
 {
     if (!m_shapeList.contains(id))
     {
         throw std::invalid_argument("Shape with given Id not exists");
     }
 
-    auto shape = m_shapeList.find(id);
-    shape->second->Move(x, y);
+    const auto shape = m_shapeList.find(id);
+    shape->second->Move(dx, dy);
 }
 
 void Picture::DeleteShape(const std::string& id)
@@ -56,44 +56,44 @@ void Picture::DeleteShape(const std::string& id)
     }
 
     m_shapeList.erase(id);
-    auto it = std::remove(m_shapesId.begin(), m_shapesId.end(), id);
+    const auto it = std::remove(m_shapesId.begin(), m_shapesId.end(), id);
     m_shapesId.erase(it, m_shapesId.end());
 }
 
-void Picture::DrawShape(const std::string& id, gfx::ICanvas &canvas)
+void Picture::DrawShape(const std::string& id, gfx::ICanvas &canvas) const
 {
     if (!m_shapeList.contains(id))
     {
         throw std::invalid_argument("Shape with given Id not exists");
     }
 
-    auto shape = m_shapeList.find(id);
+    const auto shape = m_shapeList.find(id);
     shape->second->Draw(canvas);
 }
 
-void Picture::ChangeColor(const std::string& id, Color color)
+void Picture::ChangeColor(const std::string& id, Color color) const
 {
     if (!m_shapeList.contains(id))
     {
         throw std::invalid_argument("Shape with given Id not exists");
     }
 
-    auto shape = m_shapeList.find(id);
+    const auto shape = m_shapeList.find(id);
     shape->second->SetColor(color);
 }
 
-void Picture::ChangeShape(const std::string& id, std::unique_ptr<IShapeStrategy> newShapeStrategy)
+void Picture::ChangeShape(const std::string& id, std::unique_ptr<IShapeStrategy> newShapeStrategy) const
 {
     if (!m_shapeList.contains(id))
     {
         throw std::invalid_argument("Shape with given Id not exists");
     }
 
-    auto shape = m_shapeList.find(id);
+    const auto shape = m_shapeList.find(id);
     shape->second->SetShapeStrategy(std::move(newShapeStrategy));
 }
 
-void Picture::DrawPicture(gfx::ICanvas &canvas)
+void Picture::DrawPicture(gfx::ICanvas &canvas) const
 {
     for (auto& shape : m_shapeList)
     {
@@ -101,7 +101,7 @@ void Picture::DrawPicture(gfx::ICanvas &canvas)
     }
 };
 
-void Picture::MovePicture(double x, double y)
+void Picture::MovePicture(double x, double y) const
 {
     for (auto& shape : m_shapeList)
     {

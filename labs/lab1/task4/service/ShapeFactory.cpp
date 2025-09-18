@@ -2,32 +2,31 @@
 
 #include <iostream>
 #include <memory>
-#include <sstream>
 
-std::unique_ptr<shapes::IShapeStrategy> ShapeFactory::CreateShape(std::istream& iss)
+std::unique_ptr<shapes::IShapeStrategy> ShapeFactory::CreateShape(std::istream& line)
 {
     std::string shapeName;
-    iss >> shapeName;
+    line >> shapeName;
 
     if (shapeName == "circle")
     {
-        return createCircle(iss);
+        return createCircle(line);
     }
     if (shapeName == "line")
     {
-        return createLine(iss);
+        return createLine(line);
     }
     if (shapeName == "rectangle")
     {
-        return createRectangle(iss);
+        return createRectangle(line);
     }
     if (shapeName == "text")
     {
-        return createText(iss);
+        return createText(line);
     }
     if (shapeName == "triangle")
     {
-        return createTriangle(iss);
+        return createTriangle(line);
     }
 
     return nullptr;

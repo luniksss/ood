@@ -9,7 +9,7 @@ namespace shapes
 class TextStrategy: public IShapeStrategy
 {
 public:
-    TextStrategy(Point topLeftPoint, double size, std::string&& text)
+    TextStrategy(const Point topLeftPoint, const double size, std::string&& text)
         : m_topLeftPoint(topLeftPoint)
         , m_size(size)
         , m_text(text)
@@ -20,13 +20,13 @@ public:
         }
     };
 
-    void Move(double dx, double dy) override
+    void Move(const double dx, const double dy) override
     {
         m_topLeftPoint.m_x += dx;
         m_topLeftPoint.m_y += dy;
     }
 
-    std::string ShowInfo() const override
+    [[nodiscard]] std::string ShowInfo() const override
     {
         return std::to_string(m_topLeftPoint.m_x)
         + " " + std::to_string(m_topLeftPoint.m_y)
@@ -34,7 +34,7 @@ public:
         + " " + m_text;
     }
 
-    std::string GetShapeName() const override
+    [[nodiscard]] std::string GetShapeName() const override
     {
         return m_name;
     }

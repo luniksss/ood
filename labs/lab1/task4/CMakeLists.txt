@@ -34,6 +34,7 @@ set(SOURCE_FILES
 
 set(TEST_SOURCE_FILES
         test/ShapeTest.cpp
+        ./picture/Picture.cpp
 )
 
 add_executable(task4 ${SOURCE_FILES})
@@ -48,6 +49,7 @@ add_executable(task4_test ${TEST_SOURCE_FILES})
 target_link_libraries(task4_test
         PRIVATE
         GTest::gtest_main
+        GTest::gmock_main
         sfml-graphics
 )
 enable_testing()
