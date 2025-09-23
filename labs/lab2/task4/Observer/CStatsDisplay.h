@@ -18,14 +18,14 @@ private:
     IObservable<SWeatherInfo> *m_stationIn{};
     IObservable<SWeatherInfo> *m_stationOut{};
 
-    void calculateData(SWeatherInfo const& data)
+    void CalculateData(SWeatherInfo const& data)
     {
         m_temperature.ProcessData(data.temperature);
         m_humidity.ProcessData(data.humidity);
         m_pressure.ProcessData(data.pressure);
     }
 
-    std::string defineStation(const IObservable<SWeatherInfo>* subject) const
+    std::string DefineStation(const IObservable<SWeatherInfo>* subject) const
     {
         if (subject == m_stationIn)
         {
@@ -38,18 +38,25 @@ private:
         return "Undefined station";
     }
 
+    static void DisplayData(const CCounter &data, const std::string& name)
+    {
+        std::cout << "Max " << name << " " << data.GetMaxData() << std::endl;
+        std::cout << "Min " << name << " " << data.GetMinData() << std::endl;
+        std::cout << "Average " << name << " " << data.GetAverage() << std::endl;
+    }
+
     /* Метод Update сделан приватным, чтобы ограничить возможность его вызова напрямую
     Классу CObservable он будет доступен все равно, т.к. в интерфейсе IObserver он
     остается публичным
     */
     void Update(SWeatherInfo const& data, const IObservable<SWeatherInfo>* subject) override
     {
-        calculateData(data);
+        CalculateData(data);
 
-        std::cout << defineStation(subject) << std::endl;
-        m_temperature.DisplayData("Temperature");
-        m_humidity.DisplayData("Humidity");
-        m_pressure.DisplayData("Pressure");
+        std::cout << DefineStation(subject) << std::endl;
+        DisplayData(m_temperature, "Temperature");
+        DisplayData(m_humidity, "Humidity");
+        DisplayData(m_pressure, "Pressure");
         std::cout << "----------------" << std::endl;
     }
 

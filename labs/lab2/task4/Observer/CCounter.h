@@ -7,7 +7,7 @@
 class CCounter
 {
 public:
-    void ProcessData(double data)
+    void ProcessData(const double data)
     {
         if (m_minData > data)
         {
@@ -21,28 +21,20 @@ public:
         ++m_countData;
     }
 
-    double GetMinData() const
+    [[nodiscard]] double GetMinData() const
     {
         return m_minData;
     }
 
-    double GetMaxData() const
+    [[nodiscard]] double GetMaxData() const
     {
         return m_maxData;
     }
 
-    double GetAverage() const
+    [[nodiscard]] double GetAverage() const
     {
         return m_sumData / m_countData;
     }
-
-    void DisplayData(const std::string& name)
-    {
-        std::cout << "Max " << name << " " << GetMaxData() << std::endl;
-        std::cout << "Min " << name << " " << GetMinData() << std::endl;
-        std::cout << "Average " << name << " " << GetAverage() << std::endl;
-    }
-
 private:
     double m_minData = std::numeric_limits<double>::infinity();
     double m_maxData = -std::numeric_limits<double>::infinity();

@@ -17,7 +17,7 @@ private:
     IObservable<SWeatherInfo> *m_stationIn;
     IObservable<SWeatherInfo> *m_stationOut;
 
-    std::string defineStation(const IObservable<SWeatherInfo>* subject) const
+    std::string DefineStation(const IObservable<SWeatherInfo>* subject) const
     {
         if (subject == m_stationIn)
         {
@@ -36,7 +36,7 @@ private:
     */
     void Update(SWeatherInfo const& data, const IObservable<SWeatherInfo>* subject) override
     {
-        std::cout << defineStation(subject) << std::endl;
+        std::cout << DefineStation(subject) << std::endl;
         std::cout << "Current Temp " << data.temperature << std::endl;
         std::cout << "Current Hum " << data.humidity << std::endl;
         std::cout << "Current Pressure " << data.pressure << std::endl;
