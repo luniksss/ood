@@ -42,13 +42,6 @@ public:
         return m_sumData / m_countData;
     }
 
-    void DisplayData(const std::string& name) const
-    {
-        std::cout << "Max " << name << " " << GetMaxData() << std::endl;
-        std::cout << "Min " << name << " " << GetMinData() << std::endl;
-        std::cout << "Average " << name << " " << GetAverage() << std::endl;
-    }
-
 private:
     double m_minData = std::numeric_limits<double>::infinity();
     double m_maxData = -std::numeric_limits<double>::infinity();
