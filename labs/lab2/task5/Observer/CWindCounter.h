@@ -1,8 +1,6 @@
 #ifndef CWINDCOUNTER_H
 #define CWINDCOUNTER_H
 #include <limits>
-#include <string>
-#include <iostream>
 #include <cmath>
 
 #include "../SWeatherInfo.h"
@@ -66,10 +64,10 @@ private:
     double m_windSpeedTotal = 0;
     double m_minWindSpeed = std::numeric_limits<double>::infinity();
     double m_maxWindSpeed = -std::numeric_limits<double>::infinity();
-    int m_windCountData = 0;
+    int    m_windCountData = 0;
     double m_sumSin = 0;
     double m_sumCos = 0;
-    int m_degreesCount = 0;
+    int    m_degreesCount = 0;
 
     void AddAngle(const double angle)
     {
