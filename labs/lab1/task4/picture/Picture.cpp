@@ -71,26 +71,15 @@ void Picture::DrawShape(const std::string& id, gfx::ICanvas &canvas) const
     shape->second->Draw(canvas);
 }
 
-void Picture::ChangeColor(const std::string& id, Color color) const
+Shape* Picture::FindShape(const std::string &id) const
 {
     if (!m_shapeList.contains(id))
     {
         throw std::invalid_argument("Shape with given Id not exists");
     }
 
-    const auto shape = m_shapeList.find(id);
-    shape->second->SetColor(color);
-}
-
-void Picture::ChangeShape(const std::string& id, std::unique_ptr<IShapeStrategy> newShapeStrategy) const
-{
-    if (!m_shapeList.contains(id))
-    {
-        throw std::invalid_argument("Shape with given Id not exists");
-    }
-
-    const auto shape = m_shapeList.find(id);
-    shape->second->SetShapeStrategy(std::move(newShapeStrategy));
+    auto& shape = m_shapeList.find(id)->second;
+    return shape.get(); // Return raw pointer without moving ownership
 }
 
 void Picture::DrawPicture(gfx::ICanvas &canvas) const

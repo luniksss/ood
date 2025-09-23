@@ -10,6 +10,7 @@ namespace gfx
 class SFMLCanvas: public ICanvas
 {
 public:
+    //RenderWindow наследник Target - можно передавать (совет)
     explicit SFMLCanvas(sf::RenderWindow& window) : m_window(window)
     {
         m_texture.create(window.getSize().x, window.getSize().y);

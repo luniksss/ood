@@ -15,9 +15,7 @@ public:
     void MoveShape(const std::string& id, double dx, double dy) const;
     void DeleteShape(const std::string &id);
     void DrawShape(const std::string& id, gfx::ICanvas &canvas) const;
-
-    void ChangeColor(const std::string& id, Color color) const;
-    void ChangeShape(const std::string &id, std::unique_ptr<IShapeStrategy> newShapeStrategy) const;
+    Shape* FindShape(const std::string &id) const;
 
     void DrawPicture(gfx::ICanvas &canvas) const;
     void MovePicture(double dx, double dy) const;

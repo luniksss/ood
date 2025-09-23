@@ -102,8 +102,8 @@ void DrawingCommandHandler::ChangeColor(std::istream& params) const
     }
 
     const shapes::Color colorValue = std::stoul(color, nullptr, 16);
-    m_picture.ChangeColor(id, colorValue);
-
+    const auto shape = m_picture.FindShape(id);
+    shape->SetColor(colorValue);
 }
 
 void DrawingCommandHandler::ChangeShape(std::istream& params) const
@@ -118,7 +118,8 @@ void DrawingCommandHandler::ChangeShape(std::istream& params) const
     try
     {
         auto newShapeStrategy = ShapeFactory::CreateShape(params);
-        m_picture.ChangeShape(id, std::move(newShapeStrategy));
+        const auto shape = m_picture.FindShape(id);
+        shape->SetShapeStrategy(std::move(newShapeStrategy));
     }
     catch (std::exception const& e)
     {
