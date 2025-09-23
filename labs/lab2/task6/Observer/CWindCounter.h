@@ -62,14 +62,6 @@ public:
         return avgDegrees;
     }
 
-    void DisplayData(const std::string& name) const
-    {
-        std::cout << "Max " << name << " " << GetMaxWindSpeed() << std::endl;
-        std::cout << "Min " << name << " " << GetMinWindSpeed() << std::endl;
-        std::cout << "Average " << name << " " << GetWindSpeedAverage() << std::endl;
-        std::cout << "Average " << name << " direction " << GetWindDirectionAverage() << " degrees" << std::endl;
-    }
-
 private:
     double m_windSpeedTotal = 0;
     double m_minWindSpeed = std::numeric_limits<double>::infinity();
