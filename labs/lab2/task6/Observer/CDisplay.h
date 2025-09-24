@@ -9,30 +9,54 @@ class CDisplay: public IObserver<SWeatherInfo>
 public:
     CDisplay(
         IObservable<SWeatherInfo>* stationIn,
-        IObservable<SWeatherInfo>* stationOut
+        const int stationInPriority,
+        IObservable<SWeatherInfo>* stationOut,
+        const int stationOutPriority
     ): m_stationIn(stationIn), m_stationOut(stationOut)
     {
+        //TODO подписываться
+        if (m_stationIn)
+        {
+            m_stationIn->RegisterObserver(*this, stationInPriority);
+        }
+        if (m_stationOut)
+        {
+            m_stationOut->RegisterObserver(*this, stationOutPriority);
+        }
+    }
+
+    //TODO отписываться в деструкторе
+    ~CDisplay() override
+    {
+        if (m_stationIn)
+        {
+            m_stationIn->RemoveObserver(*this);
+        }
+        if (m_stationOut)
+        {
+            m_stationOut->RemoveObserver(*this);
+        }
     }
 private:
     IObservable<SWeatherInfo> *m_stationIn;
     IObservable<SWeatherInfo> *m_stationOut;
 
-    int defineStation(const IObservable<SWeatherInfo>* subject, SWeatherInfo const& data) const
+    bool DefineStation(const IObservable<SWeatherInfo>* subject, SWeatherInfo const& data) const
     {
         if (subject == m_stationIn)
         {
             std::cout <<  "Inside station" << std::endl;
-            return 0;
+            return true;
         }
         if (subject == m_stationOut)
         {
             std::cout <<  "Outside station" << std::endl;
             std::cout <<  "Current wind speed " << data.wind.speed << std::endl;
             std::cout <<  "Current wind direction " << data.wind.direction << std::endl;
-            return 0;
+            return true;
         }
-        std::cout <<  "Undefined station" << std::endl;
-        return 1;
+        std::cout << "Undefined station" << std::endl;
+        return false;
     }
 
     /* Метод Update сделан приватным, чтобы ограничить возможность его вызова напрямую
@@ -41,7 +65,7 @@ private:
     */
     void Update(SWeatherInfo const& data, const IObservable<SWeatherInfo>* subject) override
     {
-        if (defineStation(subject, data))
+        if (!DefineStation(subject, data))
         {
             return;
         };

@@ -1,8 +1,6 @@
 #ifndef CWINDCOUNTER_H
 #define CWINDCOUNTER_H
 #include <limits>
-#include <string>
-#include <iostream>
 #include <cmath>
 
 #include "../SWeatherInfo.h"

@@ -4,6 +4,7 @@
 #include <set>
 #include <vector>
 #include <map>
+#include <unordered_map>
 
 template <class T>
 class CObservable : public IObservable<T>
@@ -13,43 +14,49 @@ public:
 
     void RegisterObserver(ObserverType & observer, int priority) override
     {
-        for (const auto& [prio, observersSet] : m_observers)
+        if (m_observerPriorityMap.contains(&observer))
         {
-            if (observersSet.find(&observer) != observersSet.end())
-            {
-                return;
-            }
+            return;
         }
-
         m_observers[priority].insert(&observer);
+        m_observerPriorityMap[&observer] = priority;
     }
 
     void NotifyObservers() override
     {
         T data = GetChangedData();
+
+        std::vector<ObserverType*> observersCopy;
         for (const auto& [priority, observersSet] : m_observers)
         {
-            std::vector<ObserverType*> observersCopy(observersSet.begin(), observersSet.end());
-            for (auto observer : observersCopy)
-            {
-                observer->Update(data, this);
-            }
+            observersCopy.insert(observersCopy.end(), observersSet.begin(), observersSet.end());
+        }
+
+        for (auto observer : observersCopy)
+        {
+            observer->Update(data, this);
         }
     }
 
     void RemoveObserver(ObserverType & observer) override
     {
-        for (auto it = m_observers.begin(); it != m_observers.end(); ++it)
+        auto observerPriority = m_observerPriorityMap.find(&observer);
+        if (observerPriority == m_observerPriorityMap.end())
         {
-            if (it->second.erase(&observer) > 0)
+            return;
+        }
+
+        int priority = observerPriority->second;
+        auto requiredObserver = m_observers.find(priority);
+        if (requiredObserver != m_observers.end())
+        {
+            requiredObserver->second.erase(&observer);
+            if (requiredObserver->second.empty())
             {
-                if (it->second.empty())
-                {
-                    m_observers.erase(it);
-                }
-                break;
+                m_observers.erase(requiredObserver);
             }
         }
+        m_observerPriorityMap.erase(observerPriority);
     }
 
 protected:
@@ -59,6 +66,7 @@ protected:
 
 private:
     std::map<int, std::set<ObserverType*>, std::greater<int>> m_observers;
+    std::unordered_map<ObserverType*, int> m_observerPriorityMap{};
 };
 
 #endif //COBSERVABLE_H

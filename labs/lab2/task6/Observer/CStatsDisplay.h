@@ -11,10 +11,35 @@ class CStatsDisplay : public IObserver<SWeatherInfo>
 public:
     CStatsDisplay(
         IObservable<SWeatherInfo> *stationIn,
-        IObservable<SWeatherInfo> *stationOut
+        const int stationInPriority,
+        IObservable<SWeatherInfo> *stationOut,
+        const int stationOutPriority
     ): m_stationIn(stationIn), m_stationOut(stationOut)
     {
-    };
+        //TODO подписываться
+        if (m_stationIn)
+        {
+            m_stationIn->RegisterObserver(*this, stationInPriority);
+        }
+        if (m_stationOut)
+        {
+            m_stationOut->RegisterObserver(*this, stationOutPriority);
+        }
+    }
+
+    //TODO отписываться в деструкторе
+    ~CStatsDisplay() override
+    {
+        if (m_stationIn)
+        {
+            m_stationIn->RemoveObserver(*this);
+        }
+        if (m_stationOut)
+        {
+            m_stationOut->RemoveObserver(*this);
+        }
+    }
+
 private:
     IObservable<SWeatherInfo> *m_stationIn{};
     IObservable<SWeatherInfo> *m_stationOut{};
@@ -27,21 +52,37 @@ private:
         m_wind.ProcessData(data.wind);
     }
 
-    int defineStation(const IObservable<SWeatherInfo>* subject) const
+    static void DisplayData(const CCounter &data, const std::string& name)
+    {
+        std::cout << "Max " << name << " " << data.GetMaxData() << std::endl;
+        std::cout << "Min " << name << " " << data.GetMinData() << std::endl;
+        std::cout << "Average " << name << " " << data.GetAverage() << std::endl;
+    }
+
+    static void DisplayWindData(const CWindCounter &data, const std::string& name)
+    {
+        std::cout << "Max " << name << " " << data.GetMaxWindSpeed() << std::endl;
+        std::cout << "Min " << name << " " << data.GetMinWindSpeed() << std::endl;
+        std::cout << "Average " << name << " " << data.GetWindSpeedAverage() << std::endl;
+        std::cout << "Average " << name << " direction " << data.GetWindDirectionAverage() << " degrees" << std::endl;
+    }
+
+    //TODO лучше возвращать true/false
+    bool DefineStation(const IObservable<SWeatherInfo>* subject) const
     {
         if (subject == m_stationIn)
         {
             std::cout << "Inside station" << std::endl;
-            return 0;
+            return true;
         }
         if (subject == m_stationOut)
         {
             std::cout << "Outside station" << std::endl;
-            m_wind.DisplayData("Wind");
-            return 0;
+            DisplayWindData(m_wind, "Wind");
+            return true;
         }
         std::cout << "Undefined station" << std::endl;
-        return 1;
+        return false;
     }
 
     /* Метод Update сделан приватным, чтобы ограничить возможность его вызова напрямую
@@ -52,13 +93,13 @@ private:
     {
         calculateData(data);
 
-        if (defineStation(subject))
+        if (!DefineStation(subject))
         {
             return;
         };
-        m_temperature.DisplayData("Temperature");
-        m_humidity.DisplayData("Humidity");
-        m_pressure.DisplayData("Pressure");
+        DisplayData(m_temperature, "Temperature");
+        DisplayData(m_humidity, "Humidity");
+        DisplayData(m_pressure, "Pressure");
         std::cout << "----------------" << std::endl;
     }
 

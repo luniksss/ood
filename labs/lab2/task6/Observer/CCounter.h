@@ -1,8 +1,6 @@
 #ifndef CCOUNTER_H
 #define CCOUNTER_H
 #include <limits>
-#include <string>
-#include <iostream>
 
 class CCounter
 {

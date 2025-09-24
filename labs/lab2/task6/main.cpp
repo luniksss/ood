@@ -6,24 +6,17 @@ int main()
 {
     CWeatherData weatherIn;
     CWeatherData weatherOut;
-
-    CDisplay display(&weatherIn, &weatherOut);
-    CStatsDisplay statsDisplay(&weatherIn, &weatherOut);
-
-    weatherIn.RegisterObserver(display, 1);
-    weatherOut.RegisterObserver(display, 1);
-    weatherIn.RegisterObserver(statsDisplay, 2);
-    weatherOut.RegisterObserver(statsDisplay, 2);
-
     SWindInfo wind = {3, 10};
+
+    //TODO лучше регистрироваться самому через конструктор и отписываться через деструктор
+    CDisplay display(&weatherIn, 1, &weatherOut, 1);
+    CStatsDisplay statsDisplay(&weatherIn, 2, &weatherOut, 2);
+
     weatherIn.SetMeasurements(3, 0.7, 760, wind);
     weatherOut.SetMeasurements(15, 0.55, 750, wind);
 
     weatherIn.SetMeasurements(4, 0.8, 761, wind);
     weatherOut.SetMeasurements(16, 0.60, 751, wind);
-
-    weatherIn.RemoveObserver(statsDisplay);
-    weatherOut.RemoveObserver(statsDisplay);
 
     wind.direction = 100;
     wind.speed = 10;
