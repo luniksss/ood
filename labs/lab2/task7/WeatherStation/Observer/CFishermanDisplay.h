@@ -1,7 +1,7 @@
 #ifndef CFISHERMANDISPLAY_H
 #define CFISHERMANDISPLAY_H
 #include "../SWeatherInfo.h"
-#include "./IObserver.h"
+#include "../../Observer/IObserver.h"
 #include <iostream>
 
 class CFishermanDisplay : public IObserver<SWeatherInfo, EWeatherEventType>

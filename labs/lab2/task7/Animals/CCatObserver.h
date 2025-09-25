@@ -2,7 +2,7 @@
 #define CCATOBSERVER_H
 #include "./SAnimalInfo.h"
 #include "./EAnimalEventType.h"
-#include "../WeatherStation/Observer/IObserver.h"
+#include "../Observer/IObserver.h"
 #include <iostream>
 
 class CCatObserver : public IObserver<SAnimalInfo, EAnimalEventType>
@@ -12,7 +12,8 @@ private:
     Классу CObservable он будет доступен все равно, т.к. в интерфейсе IObserver он
     остается публичным
     */
-    void Update(SAnimalInfo const& data, const EAnimalEventType eventType) override {
+    void Update(SAnimalInfo const& data, const EAnimalEventType eventType) override
+    {
         if (data.name == "cat")
         {
             switch (eventType)

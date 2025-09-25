@@ -39,6 +39,6 @@ void ProcessWeather()
 int main()
 {
     ProcessAnimals();
-    // ProcessWeather();
+    ProcessWeather();
     return 0;
 }

@@ -2,7 +2,7 @@
 #define CMOUSEOBSERVER_H
 #include "./SAnimalInfo.h"
 #include "./EAnimalEventType.h"
-#include "../WeatherStation/Observer/IObserver.h"
+#include "../Observer/IObserver.h"
 #include <iostream>
 
 class CMouseObserver : public IObserver<SAnimalInfo, EAnimalEventType>

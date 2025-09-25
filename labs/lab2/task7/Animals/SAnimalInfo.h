@@ -2,7 +2,8 @@
 #define SANIMALINFO_H
 #include <string>
 
-struct SAnimalInfo {
+struct SAnimalInfo
+{
   std::string name;
 };
 

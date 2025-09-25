@@ -2,7 +2,7 @@
 #define CANIMALDATA_H
 #include "./SAnimalInfo.h"
 #include "./EAnimalEventType.h"
-#include "../WeatherStation/Observable/CObservable.h"
+#include "../Observer/CObservable.h"
 
 class CAnimalData: public CObservable<SAnimalInfo, EAnimalEventType>
 {

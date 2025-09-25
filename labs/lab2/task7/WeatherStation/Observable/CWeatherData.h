@@ -1,7 +1,8 @@
 #ifndef CWEATHERDATA_H
 #define CWEATHERDATA_H
 #include "../SWeatherInfo.h"
-#include "./CObservable.h"
+#include "../../Observer/CObservable.h"
+#include "../EWeatherEventType.h"
 
 class CWeatherData : public CObservable<SWeatherInfo, EWeatherEventType>
 {

@@ -1,6 +1,5 @@
 #ifndef IOBSERVER_H
 #define IOBSERVER_H
-#include "../EWeatherEventType.h"
 
 /*
 Шаблонный интерфейс IObserver. Его должен реализовывать класс,
