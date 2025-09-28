@@ -13,6 +13,9 @@
 #include "./Beverage/CBerryTea.h"
 #include "./Beverage/COolongTea.h"
 #include "./Beverage/CMilkshake.h"
+#include "./Decorator/CCream.h"
+#include "./Decorator/CChocolate.h"
+#include "./Decorator/CLiquor.h"
 
 using namespace std;
 
@@ -88,6 +91,38 @@ bool DefinePortionsAmount()
 		cout << "Impossible portions amount. Will make default portions amount = 1" << endl;
 	}
 	return portionsAmount == 2;
+}
+
+int DefineChocolatePieces()
+{
+	cout << "Type chocolate pieces: from 1 to 5" << endl;
+	int chocolatePieces;
+	cin >> chocolatePieces;
+
+	if (chocolatePieces < 1 || chocolatePieces > 5)
+	{
+		cout << "Impossible chocolate pieces amount. Will make default portion amount = 1" << endl;
+		chocolatePieces = 1;
+	}
+	return chocolatePieces;
+}
+
+eLiquorType DefineLiquorType()
+{
+	cout << "Type liquor type: 1 - Chocolate, 2 - Nut" << endl;
+	int liquorType;
+	cin >> liquorType;
+
+	if (liquorType == 1)
+	{
+		return eLiquorType::Chocolate;
+	}
+	if (liquorType == 2)
+	{
+		return eLiquorType::Nut;
+	}
+	cout << "Wrong liquor type/ Will make with default - Chocolate" << endl;
+	return eLiquorType::Chocolate;
 }
 
 unique_ptr<IBeverage> DefineTea()
@@ -193,28 +228,37 @@ void DialogWithUser()
 	}
 
 	int condimentChoice;
-	for (;;)
+	for (bool done = false; !done;)
 	{
-		cout << "1 - Lemon, 2 - Cinnamon, 0 - Checkout" << endl;
+		cout << "1 - Cream, 2 - Chocolate, 3 - Liquor, 0 - Checkout" << endl;
 		cin >> condimentChoice;
 
-		if (condimentChoice == 1)
+		switch (condimentChoice)
 		{
-			//beverage = make_unique<CLemon>(move(beverage));
-			beverage = move(beverage) << MakeCondiment<CLemon>(2);
-		}
-		else if (condimentChoice == 2)
-		{
-			//beverage = make_unique<CCinnamon>(move(beverage));
-			beverage = move(beverage) << MakeCondiment<CCinnamon>();
-		}
-		else if (condimentChoice == 0)
-		{
-			break;
-		}
-		else
-		{
-			return;
+			case 1:
+			{
+				beverage = move(beverage) << MakeCondiment<CCream>();
+				break;
+			}
+			case 2:
+			{
+				int chocolatePieces = DefineChocolatePieces();
+				beverage = move(beverage) << MakeCondiment<CChocolate>(chocolatePieces);
+				break;
+			}
+			case 3:
+			{
+				eLiquorType type = DefineLiquorType();
+				beverage = move(beverage) << MakeCondiment<CLiquor>(type);
+				break;
+			}
+			case 0:
+			{
+				done = true;
+				break;
+			}
+			default:
+				return;
 		}
 	}
 
