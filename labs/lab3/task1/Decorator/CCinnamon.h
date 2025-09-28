@@ -6,16 +6,16 @@
 class CCinnamon : public CCondimentDecorator
 {
 public:
-    CCinnamon(IBeveragePtr && beverage)
+    explicit CCinnamon(IBeveragePtr && beverage)
         : CCondimentDecorator(std::move(beverage))
     {}
 protected:
-    double GetCondimentCost()const override
+    [[nodiscard]] double GetCondimentCost() const override
     {
         return 20;
     }
 
-    std::string GetCondimentDescription()const override
+    [[nodiscard]] std::string GetCondimentDescription() const override
     {
         return "Cinnamon";
     }

@@ -10,7 +10,7 @@ public:
         :CBeverage("Milkshake")
     {}
 
-    double GetCost() const override
+    [[nodiscard]] double GetCost() const override
     {
         return 80;
     }

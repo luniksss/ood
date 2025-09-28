@@ -10,7 +10,7 @@ public:
         :CCoffee("Latte")
     {}
 
-    double GetCost() const override
+    [[nodiscard]] double GetCost() const override
     {
         return 90;
     }

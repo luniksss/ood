@@ -1,16 +1,17 @@
 #ifndef CBEVERAGE_H
 #define CBEVERAGE_H
+#include <utility>
 #include "IBeverage.h"
 
 // Базовая реализация напитка, предоставляющая его описание
 class CBeverage : public IBeverage
 {
 public:
-    CBeverage(const std::string & description)
-        :m_description(description)
+    explicit CBeverage(std::string description)
+        :m_description(std::move(description))
     {}
 
-    std::string GetDescription()const override final
+    [[nodiscard]] std::string GetDescription()const override
     {
         return m_description;
     }

@@ -6,12 +6,6 @@
 #include "./Decorator/CLemon.h"
 #include "./Beverage/CCoffee.h"
 #include "./Beverage/CTea.h"
-#include "./Beverage/CLatte.h"
-#include "./Beverage/CMilkshake.h"
-#include "./Decorator/CSyrup.h"
-#include "./Decorator/CChocolateCrumbs.h"
-#include "./Decorator/CCoconutFlakes.h"
-#include "./Decorator/CIceCubes.h"
 
 using namespace std;
 
@@ -56,9 +50,8 @@ auto MakeCondiment(const Args&...args)
 	// Возвращаем функцию, декорирующую напиток, переданный ей в качестве аргумента
 	// Дополнительные аргументы декоратора, захваченные лямбда-функцией, передаются
 	// конструктору декоратора через make_unique
-	return [=](auto && b) {
-		// Функции make_unique передаем b вместе со списком аргументов внешней функции
-		return make_unique<Condiment>(forward<decltype(b)>(b), args...);
+	return [=]<typename T0>(T0 && b) {
+		return make_unique<Condiment>(forward<T0>(b), args...);
 	};
 }
 
@@ -70,44 +63,6 @@ auto MakeCondiment(const Args&...args)
 auto beverage = make_unique<CConcreteBeverage>(a, b, c)
 					<< MakeCondimentA(d, e, f)
 					<< MakeCondimentB(g, h);
-
-Функциональные объекты MakeCondiment* запоминают аргументы, необходимые для создания
-дополнения, и возвращают фабричную функцию, принимающую оборачиваемый напиток, которая
-при своем вызове создаст нужный объект Condiment, передав ему запомненные аргументы.
-Использование:
-	auto beverage =
-		make_unique<CConcreteBeverage>(a, b, c)
-		<< MakeCondimentA(d, e, f)
-		<< MakeCondimentB(g, h);
-или даже так:
-	auto beverage =
-		make_unique<CConcreteBeverage>
-		<< MakeCondiment<CondimentA>(d, e, f)
-		<< MakeCondiment<CondimentB>(g, h);
-В последнем случае нет необходимости писать вручную реализации MakeCondimentA и MakeCondimentB, т.к.
-необходимую реализацию сгенерирует компилятор
-
-Классический способ оборачивания выглядел бы так:
-	auto baseBeverage = make_unique<CConcretedBeverage>(a, b, c);
-	auto wrappedWithCondimentA = make_unique<CCondimentA>(move(baseBeverage), d, e, f);
-	auto beverage = make_unique<CCondimentB>(move(wrappedWithCondimentA), g, h);
-либо так:
-	auto beverage = make_unique<CCondimentB>(
-						make_unique<CCondimentA>(
-							make_unique<CConcreteBeverage>(a, b, c), // Напиток
-							d, e, f	// доп. параметы CondimentA
-						),
-						g, h		// доп. параметры CondimentB
-					);
-
-unique_ptr<CLemon> operator << (IBeveragePtr && lhs, const MakeLemon & factory)
-{
-	return factory(move(lhs));
-}
-unique_ptr<CCinnamon> operator << (IBeveragePtr && lhs, const MakeCinnamon & factory)
-{
-	return factory(move(lhs));
-}
 */
 template <typename Component, typename Decorator>
 auto operator << (Component && component, const Decorator & decorate)
@@ -122,18 +77,15 @@ void DialogWithUser()
 	cin >> beverageChoice;
 
 	unique_ptr<IBeverage> beverage;
-
-	if (beverageChoice == 1)
+	switch (beverageChoice)
 	{
-		beverage = make_unique<CCoffee>();
-	}
-	else if (beverageChoice == 2)
-	{
-		beverage = make_unique<CTea>();
-	}
-	else
-	{
-		return;
+		case 1:
+			beverage = make_unique<CCoffee>();
+		break;
+		case 2:
+			beverage = make_unique<CTea>();
+		break;
+		default: return;
 	}
 
 	int condimentChoice;
@@ -170,25 +122,4 @@ int main()
 {
 	DialogWithUser();
 	cout << endl;
-	{
-		auto beverage =
-			make_unique<CLatte>()							// Наливаем чашечку латте,
-			<< MakeCondiment<CCinnamon>()					// оборачиваем корицей,
-			<< MakeCondiment<CLemon>(2)						// добавляем пару долек лимона
-			<< MakeCondiment<CIceCubes>(2, IceCubeType::Dry)// брасаем пару кубиков сухого льда
-			<< MakeCondiment<CChocolateCrumbs>(2);			// посыпаем шоколадной крошкой
-
-		// Выписываем счет покупателю
-		cout << beverage->GetDescription() << " costs " << beverage->GetCost() << endl;
-	}
-
-	{
-		auto beverage =
-			make_unique<CMilkshake>()					// Наливаем молочный коктейль
-			<< MakeCondiment<CSyrup>(SyrupType::Maple)	// заливаем кленовым сиропом
-			<< MakeCondiment<CCoconutFlakes>(8);		// посыпаем кокосовой стружкой
-
-		// Выписываем счет покупателю
-		cout << beverage->GetDescription() << " costs " << beverage->GetCost() << endl;
-	}
 }
