@@ -12,6 +12,7 @@
 #include "./Beverage/CGreenTea.h"
 #include "./Beverage/CBerryTea.h"
 #include "./Beverage/COolongTea.h"
+#include "./Beverage/CMilkshake.h"
 
 using namespace std;
 
@@ -116,6 +117,36 @@ unique_ptr<IBeverage> DefineTea()
 	return beverage;
 }
 
+unique_ptr<IBeverage> DefineMilkshake()
+{
+	cout << "1 - Small, 2 - Middle, 3 - Large" << endl;
+	int sizeChoice;
+	cin >> sizeChoice;
+
+	if (sizeChoice < 1 || sizeChoice > 3)
+	{
+		cout << "Impossible size choice. Will make default size = Large" << endl;
+	}
+
+	eMilkshakeSize size;
+	switch (sizeChoice)
+	{
+		case 1:
+			size = eMilkshakeSize::Small;
+		break;
+		case 2:
+			size = eMilkshakeSize::Middle;
+		break;
+		case 3:
+			size = eMilkshakeSize::Large;
+		break;
+		default:
+			size = eMilkshakeSize::Large;
+		break;
+	}
+	return make_unique<CMilkshake>(size);
+}
+
 unique_ptr<IBeverage> DefineCoffee()
 {
 	cout << "Type 1 for Cappuccino or 2 for Latte" << endl;
@@ -142,7 +173,7 @@ unique_ptr<IBeverage> DefineCoffee()
 
 void DialogWithUser()
 {
-	cout << "Type 1 for coffee or 2 for tea\n";
+	cout << "Type 1 for coffee, 2 for tea or 3 for milkshake\n";
 	int beverageChoice;
 	cin >> beverageChoice;
 
@@ -154,6 +185,9 @@ void DialogWithUser()
 		break;
 		case 2:
 			beverage = DefineTea();
+		break;
+		case 3:
+			beverage = DefineMilkshake();
 		break;
 		default: return;
 	}
