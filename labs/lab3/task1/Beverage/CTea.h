@@ -6,8 +6,8 @@
 class CTea : public CBeverage
 {
 public:
-    CTea()
-        :CBeverage("Tea")
+    explicit CTea(const std::string& description = "Tea")
+        :CBeverage(description)
     {}
 
     [[nodiscard]] double GetCost() const override

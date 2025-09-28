@@ -5,7 +5,13 @@
 #include "./Decorator/CCinnamon.h"
 #include "./Decorator/CLemon.h"
 #include "./Beverage/CCoffee.h"
+#include "./Beverage/CCappuccino.h"
+#include "./Beverage/CLatte.h"
 #include "./Beverage/CTea.h"
+#include "./Beverage/CBlackTea.h"
+#include "./Beverage/CGreenTea.h"
+#include "./Beverage/CBerryTea.h"
+#include "./Beverage/COolongTea.h"
 
 using namespace std;
 
@@ -70,6 +76,54 @@ auto operator << (Component && component, const Decorator & decorate)
 	return decorate(forward<Component>(component));
 }
 
+unique_ptr<IBeverage> DefineTea()
+{
+	cout << "1 - Black, 2 - Green, 3 - Berry, 4 - Oolong tea" << endl;
+	int teaChoice;
+	cin >> teaChoice;
+
+	unique_ptr<IBeverage> beverage;
+	switch (teaChoice)
+	{
+		case 1:
+			beverage = make_unique<CBlackTea>();
+		break;
+		case 2:
+			beverage = make_unique<CGreenTea>();
+		break;
+		case 3:
+			beverage = make_unique<CBerryTea>();
+		break;
+		case 4:
+			beverage = make_unique<COolongTea>();
+		break;
+		default:
+			beverage = make_unique<CTea>();
+	}
+	return beverage;
+}
+
+unique_ptr<IBeverage> DefineCoffee()
+{
+	cout << "Type 1 for Cappuccino or 2 for Latte" << endl;
+	int coffeeChoice;
+	cin >> coffeeChoice;
+
+	unique_ptr<IBeverage> beverage;
+	switch (coffeeChoice)
+	{
+		case 1:
+			beverage = make_unique<CCappuccino>();
+		break;
+		case 2:
+			beverage = make_unique<CLatte>();
+		break;
+		default:
+			beverage = make_unique<CCoffee>();
+	}
+	return beverage;
+}
+
 void DialogWithUser()
 {
 	cout << "Type 1 for coffee or 2 for tea\n";
@@ -80,10 +134,10 @@ void DialogWithUser()
 	switch (beverageChoice)
 	{
 		case 1:
-			beverage = make_unique<CCoffee>();
+			beverage = DefineCoffee();
 		break;
 		case 2:
-			beverage = make_unique<CTea>();
+			beverage = DefineTea();
 		break;
 		default: return;
 	}
