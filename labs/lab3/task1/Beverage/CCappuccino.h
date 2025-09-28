@@ -2,18 +2,21 @@
 #define CCAPPUCCINO_H
 #include "CCoffee.h"
 
-// Капуччино
+// Капучино
 class CCappuccino : public CCoffee
 {
 public:
-    CCappuccino()
+    explicit CCappuccino(const bool isDouble)
         :CCoffee("Cappuccino")
+        , m_isDouble(isDouble)
     {}
 
     [[nodiscard]] double GetCost() const override
     {
-        return 80;
+        return m_isDouble ? 120 : 80;
     }
+private:
+    bool m_isDouble = false;
 };
 
 #endif //CCAPPUCCINO_H

@@ -6,14 +6,17 @@
 class CLatte : public CCoffee
 {
 public:
-    CLatte()
+    explicit CLatte(const bool isDouble)
         :CCoffee("Latte")
+        , m_isDouble(isDouble)
     {}
 
     [[nodiscard]] double GetCost() const override
     {
-        return 90;
+        return m_isDouble ? 130 : 90;
     }
+private:
+    bool m_isDouble;
 };
 
 #endif //CLATTE_H

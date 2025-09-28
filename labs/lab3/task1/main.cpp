@@ -76,6 +76,19 @@ auto operator << (Component && component, const Decorator & decorate)
 	return decorate(forward<Component>(component));
 }
 
+bool DefinePortionsAmount()
+{
+	cout << "Type portions amount: 1 or 2" << endl;
+	int portionsAmount;
+	cin >> portionsAmount;
+
+	if (portionsAmount < 1 || portionsAmount > 2)
+	{
+		cout << "Impossible portions amount. Will make default portions amount = 1" << endl;
+	}
+	return portionsAmount == 2;
+}
+
 unique_ptr<IBeverage> DefineTea()
 {
 	cout << "1 - Black, 2 - Green, 3 - Berry, 4 - Oolong tea" << endl;
@@ -112,11 +125,14 @@ unique_ptr<IBeverage> DefineCoffee()
 	unique_ptr<IBeverage> beverage;
 	switch (coffeeChoice)
 	{
+		bool isDouble;
 		case 1:
-			beverage = make_unique<CCappuccino>();
+			isDouble = DefinePortionsAmount();
+			beverage = make_unique<CCappuccino>(isDouble);
 		break;
 		case 2:
-			beverage = make_unique<CLatte>();
+			isDouble = DefinePortionsAmount();
+			beverage = make_unique<CLatte>(isDouble);
 		break;
 		default:
 			beverage = make_unique<CCoffee>();
