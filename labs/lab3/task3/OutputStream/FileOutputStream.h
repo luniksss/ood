@@ -18,9 +18,8 @@ public:
 
     void WriteByte(uint8_t data) override
     {
-        std::cout << "FileOutputStream::WriteByte: 0x" << std::hex << (int)data << std::dec << std::endl;
         m_file.put(static_cast<char>(data));
-        m_file.flush(); // Принудительно сбрасываем буфер
+        m_file.flush();
         if (m_file.fail())
         {
             std::cerr << "FileOutputStream::WriteByte FAILED" << std::endl;
@@ -39,7 +38,6 @@ public:
 
     void Close() override
     {
-        std::cout << "FileOutputStream::Close called" << std::endl;
         if (m_file.is_open())
         {
             m_file.flush();

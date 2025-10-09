@@ -6,26 +6,32 @@
 class MemoryOutputStream : public IOutputDataStream
 {
 public:
-    void WriteByte(uint8_t data) override
+    void WriteByte(const uint8_t data) override
     {
+        if (m_closed) throw std::logic_error("Stream closed");
         m_data.push_back(data);
     }
 
-    void WriteBlock(const void* srcData, std::streamsize size) override
+    void WriteBlock(const void* srcData, const std::streamsize size) override
     {
-        const uint8_t* data = static_cast<const uint8_t*>(srcData);
+        if (m_closed) throw std::logic_error("Stream closed");
+        const auto* data = static_cast<const uint8_t*>(srcData);
         m_data.insert(m_data.end(), data, data + size);
     }
 
-    void Close() override {};
+    void Close() override
+    {
+        m_closed = true;
+    }
 
-    std::vector<uint8_t> GetData() const
+    [[nodiscard]] std::vector<uint8_t> GetData() const
     {
         return m_data;
     }
 
 private:
     std::vector<uint8_t> m_data;
+    bool m_closed = false;
 };
 
 #endif //MEMORYOUTPUTSTREAM_H

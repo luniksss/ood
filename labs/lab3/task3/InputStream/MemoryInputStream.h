@@ -12,7 +12,7 @@ public:
     {
     }
 
-    bool IsEOF() const override
+    [[nodiscard]] bool IsEOF() const override
     {
         return m_position >= m_data.size();
     }
@@ -26,15 +26,17 @@ public:
         return m_data[m_position++];
     }
 
-    std::streamsize ReadBlock(void* dstBuffer, std::streamsize size) override
+    std::streamsize ReadBlock(void* dstBuffer, const std::streamsize size) override
     {
-        std::streamsize bytesToRead = std::min(size, static_cast<std::streamsize>(m_data.size() - m_position));
-        if (bytesToRead > 0)
+        auto* buffer = static_cast<uint8_t*>(dstBuffer);
+        std::streamsize bytesRead = 0;
+
+        while (bytesRead < size && !IsEOF())
         {
-            std::copy(m_data.begin() + m_position, m_data.begin() + m_position + bytesToRead, static_cast<uint8_t*>(dstBuffer));
-            m_position += bytesToRead;
+            buffer[bytesRead++] = ReadByte();
         }
-        return bytesToRead;
+
+        return bytesRead;
     }
 
 private:

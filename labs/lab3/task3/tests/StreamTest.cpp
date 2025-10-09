@@ -3,8 +3,12 @@
 #include "./FileHandlerMock.h"
 #include "../InputStream/MemoryInputStream.h"
 #include "../InputStream/FileInputStream.h"
+#include "../InputStream/DecryptInputStream.h"
+#include "../InputStream/DecompressInputStream.h"
 #include "../OutputStream/FileOutputStream.h"
 #include "../OutputStream/MemoryOutputStream.h"
+#include "../OutputStream/EncryptOutputStream.h"
+#include "../OutputStream/CompressOutputStream.h"
 
 class MemoryStreamsTest : public ::testing::Test
 {
@@ -192,4 +196,544 @@ TEST_F(FileStreamsTest, FileOutputStreamThrowsOnWriteBlock)
     stream.Close();
 
     EXPECT_THROW(stream.WriteBlock(data, sizeof(data)), std::ios_base::failure);
+}
+
+TEST_F(DecoratorStreamsTest, EncryptionChangesData)
+{
+    CreateTestFile({0x00, 0x01, 0x02, 0x03, 0x04, 0x05});
+    {
+        FileInputStream inputStream(m_testFilename);
+        auto outputStream = std::make_unique<FileOutputStream>(m_outputFilename);
+        EncryptOutputStream encryptStream(std::move(outputStream), 12345);
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!inputStream.IsEOF())
+        {
+            std::streamsize read = inputStream.ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                encryptStream.WriteBlock(buffer, read);
+            }
+        }
+        encryptStream.Close();
+    }
+
+    auto original = ReadFile(m_testFilename);
+    auto encrypted = ReadFile(m_outputFilename);
+    EXPECT_NE(original, encrypted);
+    EXPECT_FALSE(encrypted.empty());
+}
+
+TEST_F(DecoratorStreamsTest, DecryptionChangesData)
+{
+    std::vector<uint8_t> testData = {0x00, 0x01, 0x02, 0x03, 0x04};
+    CreateTestFile(testData);
+    std::string encryptedFile = "encrypted_temp.bin";
+
+    {
+        FileInputStream inputStream(m_testFilename);
+        auto outputStream = std::make_unique<FileOutputStream>(encryptedFile);
+        EncryptOutputStream encryptStream(std::move(outputStream), 12345);
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!inputStream.IsEOF())
+        {
+            std::streamsize read = inputStream.ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                encryptStream.WriteBlock(buffer, read);
+            }
+        }
+        encryptStream.Close();
+    }
+
+    {
+        auto inputStream = std::make_unique<FileInputStream>(encryptedFile);
+        FileOutputStream outputStream(m_outputFilename);
+        DecryptInputStream decryptStream(std::move(inputStream), 12345);
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!decryptStream.IsEOF())
+        {
+            std::streamsize read = decryptStream.ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                outputStream.WriteBlock(buffer, read);
+            }
+        }
+        outputStream.Close();
+    }
+
+    auto encrypted = ReadFile(encryptedFile);
+    auto decrypted = ReadFile(m_outputFilename);
+    EXPECT_NE(encrypted, decrypted);
+    EXPECT_FALSE(decrypted.empty());
+    std::remove(encryptedFile.c_str());
+}
+
+TEST_F(DecoratorStreamsTest, EncryptionDecryptionRoundTrip)
+{
+    std::vector<uint8_t> testData = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
+    CreateTestFile(testData);
+
+    std::string encryptedFile = "encrypted_temp.bin";
+    {
+        FileInputStream inputStream(m_testFilename);
+        auto outputStream = std::make_unique<FileOutputStream>(encryptedFile);
+        EncryptOutputStream encryptStream(std::move(outputStream), 12345);
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!inputStream.IsEOF())
+        {
+            std::streamsize read = inputStream.ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                encryptStream.WriteBlock(buffer, read);
+            }
+        }
+        encryptStream.Close();
+    }
+
+    {
+        auto inputStream = std::make_unique<FileInputStream>(encryptedFile);
+        FileOutputStream outputStream(m_outputFilename);
+        DecryptInputStream decryptStream(std::move(inputStream), 12345);
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!decryptStream.IsEOF())
+        {
+            std::streamsize read = decryptStream.ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                outputStream.WriteBlock(buffer, read);
+            }
+        }
+        outputStream.Close();
+    }
+
+    auto original = ReadFile(m_testFilename);
+    auto restored = ReadFile(m_outputFilename);
+
+    EXPECT_EQ(original, restored);
+
+    std::remove(encryptedFile.c_str());
+}
+
+TEST_F(DecoratorStreamsTest, MultipleEncryptionDecryptionRoundTrip)
+{
+    std::vector<uint8_t> testData = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05};
+    CreateTestFile(testData);
+
+    constexpr uint32_t keys[] = {111, 222, 333};
+    std::string currentFile = m_testFilename;
+    for (auto key : keys)
+    {
+        std::string nextFile = "temp_enc_" + std::to_string(key) + ".bin";
+        {
+            FileInputStream inputStream(currentFile);
+            auto outputStream = std::make_unique<FileOutputStream>(nextFile);
+            EncryptOutputStream encryptStream(std::move(outputStream), key);
+
+            constexpr size_t bufferSize = 1024;
+            uint8_t buffer[bufferSize];
+            while (!inputStream.IsEOF())
+            {
+                std::streamsize read = inputStream.ReadBlock(buffer, bufferSize);
+                if (read > 0)
+                {
+                    encryptStream.WriteBlock(buffer, read);
+                }
+            }
+            encryptStream.Close();
+        }
+
+        if (currentFile != m_testFilename)
+        {
+            std::remove(currentFile.c_str());
+        }
+        currentFile = nextFile;
+    }
+
+    for (auto it = std::rbegin(keys); it != std::rend(keys); ++it)
+    {
+        std::string nextFile = "temp_dec_" + std::to_string(*it) + ".bin";
+        {
+            auto inputStream = std::make_unique<FileInputStream>(currentFile);
+            FileOutputStream outputStream(nextFile);
+            DecryptInputStream decryptStream(std::move(inputStream), *it);
+
+            constexpr size_t bufferSize = 1024;
+            uint8_t buffer[bufferSize];
+            while (!decryptStream.IsEOF())
+            {
+                std::streamsize read = decryptStream.ReadBlock(buffer, bufferSize);
+                if (read > 0)
+                {
+                    outputStream.WriteBlock(buffer, read);
+                }
+            }
+            outputStream.Close();
+        }
+
+        std::remove(currentFile.c_str());
+        currentFile = nextFile;
+    }
+
+    auto original = ReadFile(m_testFilename);
+    auto restored = ReadFile(currentFile);
+
+    EXPECT_EQ(original, restored);
+
+    std::remove(currentFile.c_str());
+}
+
+TEST_F(DecoratorStreamsTest, DifferentKeysProduceDifferentEncryption)
+{
+    std::vector<uint8_t> testData = {0x00, 0x01, 0x02, 0x03, 0x04};
+    CreateTestFile(testData);
+
+    std::string encryptedFile1 = "encrypted1.bin";
+    std::string encryptedFile2 = "encrypted2.bin";
+
+    {
+        FileInputStream inputStream(m_testFilename);
+        auto outputStream = std::make_unique<FileOutputStream>(encryptedFile1);
+        EncryptOutputStream encryptStream(std::move(outputStream), 11111);
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!inputStream.IsEOF())
+        {
+            std::streamsize read = inputStream.ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                encryptStream.WriteBlock(buffer, read);
+            }
+        }
+        encryptStream.Close();
+    }
+
+    {
+        FileInputStream inputStream(m_testFilename);
+        auto outputStream = std::make_unique<FileOutputStream>(encryptedFile2);
+        EncryptOutputStream encryptStream(std::move(outputStream), 22222);
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!inputStream.IsEOF())
+        {
+            std::streamsize read = inputStream.ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                encryptStream.WriteBlock(buffer, read);
+            }
+        }
+        encryptStream.Close();
+    }
+
+    auto encrypted1 = ReadFile(encryptedFile1);
+    auto encrypted2 = ReadFile(encryptedFile2);
+
+    EXPECT_NE(encrypted1, encrypted2);
+
+    std::remove(encryptedFile1.c_str());
+    std::remove(encryptedFile2.c_str());
+}
+
+TEST_F(DecoratorStreamsTest, CompressionChangesData)
+{
+    std::vector<uint8_t> testData(100, 0xAA);
+    CreateTestFile(testData);
+
+    {
+        FileInputStream inputStream(m_testFilename);
+        auto outputStream = std::make_unique<FileOutputStream>(m_outputFilename);
+        CompressOutputStream compressStream(std::move(outputStream));
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!inputStream.IsEOF())
+        {
+            std::streamsize read = inputStream.ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                compressStream.WriteBlock(buffer, read);
+            }
+        }
+        compressStream.Close();
+    }
+
+    auto original = ReadFile(m_testFilename);
+    auto compressed = ReadFile(m_outputFilename);
+
+    EXPECT_NE(original, compressed);
+    EXPECT_FALSE(compressed.empty());
+    EXPECT_LE(compressed.size(), original.size());
+}
+
+TEST_F(DecoratorStreamsTest, DecompressionChangesData)
+{
+    std::vector<uint8_t> testData(100, 0xAA);
+    CreateTestFile(testData);
+    std::string compressedFile = "compressed_temp.bin";
+
+    {
+        FileInputStream inputStream(m_testFilename);
+        auto outputStream = std::make_unique<FileOutputStream>(compressedFile);
+        CompressOutputStream compressStream(std::move(outputStream));
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!inputStream.IsEOF())
+        {
+            std::streamsize read = inputStream.ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                compressStream.WriteBlock(buffer, read);
+            }
+        }
+        compressStream.Close();
+    }
+
+    {
+        auto inputStream = std::make_unique<FileInputStream>(compressedFile);
+        FileOutputStream outputStream(m_outputFilename);
+        DecompressInputStream decompressStream(std::move(inputStream));
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!decompressStream.IsEOF())
+        {
+            std::streamsize read = decompressStream.ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                outputStream.WriteBlock(buffer, read);
+            }
+        }
+        outputStream.Close();
+    }
+
+    auto compressed = ReadFile(compressedFile);
+    auto decompressed = ReadFile(m_outputFilename);
+
+    EXPECT_NE(compressed, decompressed);
+    EXPECT_FALSE(decompressed.empty());
+
+    std::remove(compressedFile.c_str());
+}
+
+TEST_F(DecoratorStreamsTest, CompressionDecompressionRoundTrip)
+{
+    std::vector<uint8_t> testData(100, 0xAA);
+    CreateTestFile(testData);
+    std::string compressedFile = "compressed_temp.bin";
+
+    {
+        FileInputStream inputStream(m_testFilename);
+        auto outputStream = std::make_unique<FileOutputStream>(compressedFile);
+        CompressOutputStream compressStream(std::move(outputStream));
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!inputStream.IsEOF())
+        {
+            std::streamsize read = inputStream.ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                compressStream.WriteBlock(buffer, read);
+            }
+        }
+        compressStream.Close();
+    }
+
+    {
+        auto inputStream = std::make_unique<FileInputStream>(compressedFile);
+        FileOutputStream outputStream(m_outputFilename);
+        DecompressInputStream decompressStream(std::move(inputStream));
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!decompressStream.IsEOF())
+        {
+            std::streamsize read = decompressStream.ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                outputStream.WriteBlock(buffer, read);
+            }
+        }
+        outputStream.Close();
+    }
+
+    auto original = ReadFile(m_testFilename);
+    auto restored = ReadFile(m_outputFilename);
+
+    EXPECT_EQ(original, restored);
+
+    std::remove(compressedFile.c_str());
+}
+
+TEST_F(DecoratorStreamsTest, MultipleCompressionDecompressionRoundTrip)
+{
+    std::vector<uint8_t> testData(100, 0xAA);
+    CreateTestFile(testData);
+    constexpr int compressionLevels = 3;
+
+    std::string currentFile = m_testFilename;
+    for (int i = 0; i < compressionLevels; ++i)
+    {
+        std::string nextFile = "temp_comp_" + std::to_string(i) + ".bin";
+        {
+            FileInputStream inputStream(currentFile);
+            auto outputStream = std::make_unique<FileOutputStream>(nextFile);
+            CompressOutputStream compressStream(std::move(outputStream));
+
+            constexpr size_t bufferSize = 1024;
+            uint8_t buffer[bufferSize];
+            while (!inputStream.IsEOF())
+            {
+                std::streamsize read = inputStream.ReadBlock(buffer, bufferSize);
+                if (read > 0)
+                {
+                    compressStream.WriteBlock(buffer, read);
+                }
+            }
+            compressStream.Close();
+        }
+
+        if (currentFile != m_testFilename)
+        {
+            std::remove(currentFile.c_str());
+        }
+        currentFile = nextFile;
+    }
+
+    for (int i = 0; i < compressionLevels; ++i)
+    {
+        std::string nextFile = "temp_decomp_" + std::to_string(i) + ".bin";
+        {
+            auto inputStream = std::make_unique<FileInputStream>(currentFile);
+            FileOutputStream outputStream(nextFile);
+            DecompressInputStream decompressStream(std::move(inputStream));
+
+            constexpr size_t bufferSize = 1024;
+            uint8_t buffer[bufferSize];
+            while (!decompressStream.IsEOF())
+            {
+                std::streamsize read = decompressStream.ReadBlock(buffer, bufferSize);
+                if (read > 0)
+                {
+                    outputStream.WriteBlock(buffer, read);
+                }
+            }
+            outputStream.Close();
+        }
+
+        std::remove(currentFile.c_str());
+        currentFile = nextFile;
+    }
+
+    auto original = ReadFile(m_testFilename);
+    auto restored = ReadFile(currentFile);
+
+    EXPECT_EQ(original, restored);
+
+    std::remove(currentFile.c_str());
+}
+
+TEST_F(DecoratorStreamsTest, ComplexTransformationPipeline)
+{
+    std::vector<uint8_t> testData(100, 0xAA);
+    CreateTestFile(testData);
+    constexpr uint32_t encryptionKey = 12345;
+
+    std::string compressedFile = "compressed.bin";
+    std::string encryptedFile = "encrypted.bin";
+    std::string decryptedFile = "decrypted.bin";
+    std::string finalFile = "final.bin";
+
+    {
+        auto inputStream = std::make_unique<FileInputStream>(m_testFilename);
+        auto outputStream = std::make_unique<FileOutputStream>(compressedFile);
+        auto compressStream = std::make_unique<CompressOutputStream>(std::move(outputStream));
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!inputStream->IsEOF())
+        {
+            std::streamsize read = inputStream->ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                compressStream->WriteBlock(buffer, read);
+            }
+        }
+        compressStream->Close();
+    }
+
+    {
+        auto inputStream = std::make_unique<FileInputStream>(compressedFile);
+        auto outputStream = std::make_unique<FileOutputStream>(encryptedFile);
+        auto encryptStream = std::make_unique<EncryptOutputStream>(std::move(outputStream), encryptionKey);
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!inputStream->IsEOF())
+        {
+            std::streamsize read = inputStream->ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                encryptStream->WriteBlock(buffer, read);
+            }
+        }
+        encryptStream->Close();
+    }
+
+    {
+        auto inputStream = std::make_unique<FileInputStream>(encryptedFile);
+        auto outputStream = std::make_unique<FileOutputStream>(decryptedFile);
+        auto decryptStream = std::make_unique<DecryptInputStream>(std::move(inputStream), encryptionKey);
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!decryptStream->IsEOF())
+        {
+            std::streamsize read = decryptStream->ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                outputStream->WriteBlock(buffer, read);
+            }
+        }
+        outputStream->Close();
+    }
+
+    {
+        auto inputStream = std::make_unique<FileInputStream>(decryptedFile);
+        auto outputStream = std::make_unique<FileOutputStream>(finalFile);
+        auto decompressStream = std::make_unique<DecompressInputStream>(std::move(inputStream));
+
+        constexpr size_t bufferSize = 1024;
+        uint8_t buffer[bufferSize];
+        while (!decompressStream->IsEOF())
+        {
+            std::streamsize read = decompressStream->ReadBlock(buffer, bufferSize);
+            if (read > 0)
+            {
+                outputStream->WriteBlock(buffer, read);
+            }
+        }
+        outputStream->Close();
+    }
+
+    auto original = ReadFile(m_testFilename);
+    auto finalResult = ReadFile(finalFile);
+    EXPECT_EQ(original, finalResult);
+
+    std::remove(compressedFile.c_str());
+    std::remove(encryptedFile.c_str());
+    std::remove(decryptedFile.c_str());
+    std::remove(finalFile.c_str());
 }
