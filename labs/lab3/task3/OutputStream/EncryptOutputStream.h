@@ -5,17 +5,19 @@
 #include <algorithm>
 #include <array>
 #include <memory>
-#include "./IOutputDataStream.h"
+#include "./OutputStreamDecorator.h"
 
-class EncryptOutputStream : public IOutputDataStream
+class EncryptOutputStream : public OutputStreamDecorator
 {
 public:
     EncryptOutputStream(std::unique_ptr<IOutputDataStream> stream, const uint32_t key)
-        : m_stream(std::move(stream)), m_encryptionTable(GenerateEncryptionTable(key)) {}
+        : OutputStreamDecorator(std::move(stream))
+        , m_encryptionTable(GenerateEncryptionTable(key))
+    {}
 
     void WriteByte(const uint8_t data) override
     {
-        m_stream->WriteByte(m_encryptionTable[data]);
+        m_outputStream->WriteByte(m_encryptionTable[data]);
     }
 
     void WriteBlock(const void* srcData, std::streamsize size) override
@@ -27,13 +29,7 @@ public:
         }
     }
 
-    void Close() override
-    {
-        m_stream->Close();
-    }
-
 private:
-    std::unique_ptr<IOutputDataStream> m_stream;
     std::array<uint8_t, 256> m_encryptionTable;
 
     static std::array<uint8_t, 256> GenerateEncryptionTable(const uint32_t key)

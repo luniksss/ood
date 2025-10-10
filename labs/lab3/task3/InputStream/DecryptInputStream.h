@@ -5,22 +5,20 @@
 #include <algorithm>
 #include <array>
 #include <memory>
-#include "./IInputDataStream.h"
+#include "./InputStreamDecorator.h"
 
-class DecryptInputStream : public IInputDataStream
+class DecryptInputStream : public InputStreamDecorator
 {
 public:
     DecryptInputStream(std::unique_ptr<IInputDataStream> stream, const uint32_t key)
-        : m_stream(std::move(stream)), m_decryptionTable(GenerateDecryptionTable(key)) {}
-
-    [[nodiscard]] bool IsEOF() const override
+        : InputStreamDecorator(std::move(stream))
+        , m_decryptionTable(GenerateDecryptionTable(key))
     {
-        return m_stream->IsEOF();
     }
 
     uint8_t ReadByte() override
     {
-        const uint8_t encrypted = m_stream->ReadByte();
+        const uint8_t encrypted = m_inputStream->ReadByte();
         return m_decryptionTable[encrypted];
     }
 
@@ -50,7 +48,6 @@ public:
     }
 
 private:
-    std::unique_ptr<IInputDataStream> m_stream;
     std::array<uint8_t, 256> m_decryptionTable;
 
     static std::array<uint8_t, 256> GenerateDecryptionTable(const uint32_t key)

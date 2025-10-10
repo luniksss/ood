@@ -2,8 +2,6 @@
 #include <string>
 #include <functional>
 #include <memory>
-#include "./Decorator/CCinnamon.h"
-#include "./Decorator/CLemon.h"
 #include "./Beverage/CCoffee.h"
 #include "./Beverage/CCappuccino.h"
 #include "./Beverage/CLatte.h"
@@ -18,33 +16,6 @@
 #include "./Decorator/CLiquor.h"
 
 using namespace std;
-
-/*
-Функциональный объект, создающий лимонную добавку
-*/
-struct MakeLemon
-{
-	explicit MakeLemon(const unsigned quantity)
-		:m_quantity(quantity)
-	{}
-
-	auto operator()(IBeveragePtr && beverage)const
-	{
-		return make_unique<CLemon>(move(beverage), m_quantity);
-	}
-private:
-	unsigned m_quantity;
-};
-
-/*
-Функция, возвращающая функцию, создающую коричную добавку
-*/
-function<IBeveragePtr(IBeveragePtr &&)> MakeCinnamon()
-{
-	return [] (IBeveragePtr && b) {
-		return make_unique<CCinnamon>(move(b));
-	};
-}
 
 /*
 Возвращает функцию, декорирующую напиток определенной добавкой
@@ -173,8 +144,6 @@ unique_ptr<IBeverage> DefineMilkshake()
 			size = eMilkshakeSize::Middle;
 		break;
 		case 3:
-			size = eMilkshakeSize::Large;
-		break;
 		default:
 			size = eMilkshakeSize::Large;
 		break;
@@ -189,9 +158,9 @@ unique_ptr<IBeverage> DefineCoffee()
 	cin >> coffeeChoice;
 
 	unique_ptr<IBeverage> beverage;
+	bool isDouble;
 	switch (coffeeChoice)
 	{
-		bool isDouble;
 		case 1:
 			isDouble = DefinePortionsAmount();
 			beverage = make_unique<CCappuccino>(isDouble);

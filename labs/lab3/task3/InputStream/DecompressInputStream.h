@@ -1,19 +1,19 @@
 #ifndef DECOMPRESSINPUTSTREAM_H
 #define DECOMPRESSINPUTSTREAM_H
-#include "./IInputDataStream.h"
+#include "./InputStreamDecorator.h"
 #include <memory>
 
-class DecompressInputStream : public IInputDataStream
+class DecompressInputStream : public InputStreamDecorator
 {
 public:
     explicit DecompressInputStream(std::unique_ptr<IInputDataStream> stream)
-        : m_stream(std::move(stream))
+        : InputStreamDecorator(std::move(stream))
     {
     }
 
     [[nodiscard]] bool IsEOF() const override
     {
-        return m_remainingCount == 0 && m_stream->IsEOF();
+        return m_remainingCount == 0 && m_inputStream->IsEOF();
     }
 
     uint8_t ReadByte() override
@@ -29,13 +29,13 @@ public:
             return m_repeatedByte;
         }
 
-        uint8_t byte = m_stream->ReadByte();
-        if (byte == 0xFF && !m_stream->IsEOF())
+        uint8_t byte = m_inputStream->ReadByte();
+        if (byte == 0xFF && !m_inputStream->IsEOF())
         {
             try
             {
-                uint8_t count = m_stream->ReadByte();
-                m_repeatedByte = m_stream->ReadByte();
+                uint8_t count = m_inputStream->ReadByte();
+                m_repeatedByte = m_inputStream->ReadByte();
                 m_remainingCount = count - 1;
                 return m_repeatedByte;
             }
@@ -74,7 +74,6 @@ public:
     }
 
 private:
-    std::unique_ptr<IInputDataStream> m_stream;
     uint8_t m_repeatedByte = 0;
     int m_remainingCount = 0;
 };

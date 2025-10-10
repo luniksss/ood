@@ -1,13 +1,13 @@
 #ifndef COMPRESSOUTPUTSTREAM_H
 #define COMPRESSOUTPUTSTREAM_H
-#include "./IOutputDataStream.h"
+#include "./OutputStreamDecorator.h"
 #include <memory>
 
-class CompressOutputStream : public IOutputDataStream
+class CompressOutputStream : public OutputStreamDecorator
 {
 public:
     explicit CompressOutputStream(std::unique_ptr<IOutputDataStream> stream)
-        : m_stream(std::move(stream))
+        : OutputStreamDecorator(std::move(stream))
     {
     }
 
@@ -46,7 +46,7 @@ public:
     void Close() override
     {
         FlushSequence();
-        m_stream->Close();
+        m_outputStream->Close();
     }
 
 private:
@@ -55,15 +55,15 @@ private:
         if (!m_hasData) return;
         if (m_count >= 3)
         {
-            m_stream->WriteByte(0xFF);
-            m_stream->WriteByte(static_cast<uint8_t>(m_count));
-            m_stream->WriteByte(m_lastByte);
+            m_outputStream->WriteByte(0xFF);
+            m_outputStream->WriteByte(static_cast<uint8_t>(m_count));
+            m_outputStream->WriteByte(m_lastByte);
         }
         else
         {
             for (int i = 1; i <= m_count; ++i)
             {
-                m_stream->WriteByte(m_lastByte);
+                m_outputStream->WriteByte(m_lastByte);
             }
         }
 
@@ -71,7 +71,6 @@ private:
         m_count = 0;
     }
 
-    std::unique_ptr<IOutputDataStream> m_stream;
     uint8_t m_lastByte = 0;
     int m_count = 0;
     bool m_hasData = false;
