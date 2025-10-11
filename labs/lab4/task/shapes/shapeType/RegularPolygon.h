@@ -12,11 +12,11 @@ public:
     RegularPolygon(
         const uint8_t color,
         const Point center,
-        const int pointsCount,
+        const int vertexCount,
         const double radius
     ): Shape(color),
        m_center(center),
-       m_pointsCount(pointsCount),
+       m_pointsCount(vertexCount),
        m_radius(radius)
     {
     }
