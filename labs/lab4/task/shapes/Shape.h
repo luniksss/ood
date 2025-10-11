@@ -16,7 +16,7 @@ public:
         return m_color;
     }
 
-    virtual void Draw(ICanvas& canvas) const;
+    virtual void Draw(ICanvas& canvas) const = 0;
 
     void SetColor(const uint32_t color)
     {

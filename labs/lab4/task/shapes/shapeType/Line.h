@@ -32,8 +32,7 @@ public:
     void Draw(ICanvas& canvas) const override
     {
         canvas.SetColor(GetColor());
-        canvas.MoveTo(m_start.m_x, m_start.m_y);
-        canvas.LineTo(m_end.m_x, m_end.m_y);
+        canvas.DrawLine(GetStart(), GetEnd());
     }
 
 private:

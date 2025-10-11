@@ -4,6 +4,7 @@
 #include "../shapes/Shape.h"
 #include "../shapes/ShapeFactory.h"
 #include "../designer/Designer.h"
+#include "../canvas/ICanvas.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -25,8 +26,12 @@ class MockCanvas : public ICanvas
 {
 public:
     MOCK_METHOD(void, SetColor, (uint32_t color), (override));
-    MOCK_METHOD(void, DrawLine, (const shapes::Point& from, const shapes::Point& to), (override));
-    MOCK_METHOD(void, DrawEllipse, (const shapes::Point& center, double rx, double ry), (override));
+    MOCK_METHOD(void, MoveTo, (double x, double y), (override));
+    MOCK_METHOD(void, LineTo, (double x, double y), (override));
+    MOCK_METHOD(void, DrawLine, (shapes::Point from, shapes::Point to), (override));
+    MOCK_METHOD(void, DrawEllipse, (double cx, double cy, double rx, double ry), (override));
+    MOCK_METHOD(void, DrawRectangle, (shapes::Point topLeft, double width, double height), (override));
+    MOCK_METHOD(void, DrawTriangle, (shapes::Point vertex1, shapes::Point vertex2, shapes::Point vertex3), (override));
 };
 
 class MockShapeFactory : public IShapeFactory
@@ -40,8 +45,8 @@ class MockShape : public shapes::Shape
 public:
     MockShape(uint32_t color = 0) : Shape(color) {}
 
-    MOCK_METHOD(void, Draw, (ICanvas* canvas), (override));
-    MOCK_METHOD(uint8_t, GetColor, (), (const));
+    MOCK_METHOD(void, Draw, (ICanvas& canvas), (const, override));
+    MOCK_METHOD(uint32_t, GetColor, (), (const));
 };
 
 class ClientTest : public testing::Test
@@ -204,12 +209,12 @@ TEST_F(DesignerTest, HandleFactoryThrowsException)
 TEST_F(PainterTest, DrawPictureWithSingleShape)
 {
     auto mockShape = std::make_unique<MockShape>(0x00FF00);
-    EXPECT_CALL(*mockShape, Draw(&mockCanvas)).Times(1);
+    EXPECT_CALL(*mockShape, Draw(::testing::Ref(mockCanvas))).Times(1);
     EXPECT_CALL(*mockShape, GetColor()).WillOnce(Return(0x00FF00));
 
     draft.AddShape(std::move(mockShape));
 
-    painter.DrawPicture(draft, &mockCanvas);
+    painter.DrawPicture(draft, mockCanvas);
 }
 
 TEST_F(PainterTest, DrawPictureWithMultipleShapes)
@@ -217,10 +222,10 @@ TEST_F(PainterTest, DrawPictureWithMultipleShapes)
     auto mockShape1 = std::make_unique<MockShape>(0xFF0000);
     auto mockShape2 = std::make_unique<MockShape>(0x0000FF);
 
-    EXPECT_CALL(*mockShape1, Draw(&mockCanvas)).Times(1);
+    EXPECT_CALL(*mockShape1, Draw(::testing::Ref(mockCanvas))).Times(1);
     EXPECT_CALL(*mockShape1, GetColor()).WillOnce(Return(0xFF0000));
 
-    EXPECT_CALL(*mockShape2, Draw(&mockCanvas)).Times(1);
+    EXPECT_CALL(*mockShape2, Draw(::testing::Ref(mockCanvas))).Times(1);
     EXPECT_CALL(*mockShape2, GetColor()).WillOnce(Return(0x0000FF));
 
     draft.AddShape(std::move(mockShape1));
@@ -233,7 +238,7 @@ TEST_F(PainterTest, DrawPictureWithEmptyDraft)
 {
     EXPECT_CALL(mockCanvas, SetColor(_)).Times(0);
     EXPECT_CALL(mockCanvas, DrawLine(_, _)).Times(0);
-    EXPECT_CALL(mockCanvas, DrawEllipse(_, _, _)).Times(0);
+    EXPECT_CALL(mockCanvas, DrawEllipse(_, _, _, _)).Times(0);
 
     painter.DrawPicture(draft, &mockCanvas);
 }
@@ -241,7 +246,7 @@ TEST_F(PainterTest, DrawPictureWithEmptyDraft)
 TEST_F(PainterTest, HandleCanvasThrowsException)
 {
     auto mockShape = std::make_unique<MockShape>(0x00FF00);
-    EXPECT_CALL(*mockShape, Draw(&mockCanvas)).WillOnce(testing::Throw(std::runtime_error("Canvas error")));
+    EXPECT_CALL(*mockShape, Draw(mockCanvas)).WillOnce(testing::Throw(std::runtime_error("Canvas error")));
     EXPECT_CALL(*mockShape, GetColor()).WillOnce(Return(0x00FF00));
 
     draft.AddShape(std::move(mockShape));
