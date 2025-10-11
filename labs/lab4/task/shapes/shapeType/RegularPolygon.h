@@ -2,6 +2,7 @@
 #define REGULARPOLYGON_H
 #include "../Point.h"
 #include "../Shape.h"
+#include "../../canvas/ICanvas.h"
 #include <cmath>
 
 namespace shapes

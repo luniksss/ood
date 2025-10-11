@@ -3,6 +3,7 @@
 #include "../shapes/Point.h"
 #include "../shapes/Shape.h"
 #include "../shapes/ShapeFactory.h"
+#include "../designer/Designer.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -66,7 +67,7 @@ protected:
     void SetUp() override
     {
         mockFactory = std::make_unique<MockShapeFactory>();
-        designer = std::make_unique<Designer>(mockFactory.get());
+        designer = std::make_unique<Designer>(*mockFactory.get());
     }
 
     std::unique_ptr<MockShapeFactory> mockFactory;
@@ -95,7 +96,7 @@ protected:
 
 TEST_F(ClientTest, ValidInputCreatesDesignerAndPainter)
 {
-    std::stringstream input("rectangle green 10 10 50 50");
+    std::stringstream input("rectangle 0x00FF00 10 10 50 50");
     PictureDraft draft;
     draft.AddShape(std::make_unique<MockShape>(0x00FF00));
 
@@ -119,7 +120,7 @@ TEST_F(ClientTest, ClientHandleDesignerError)
 
 TEST_F(ClientTest, ClientHandlePainterError)
 {
-    std::stringstream input("rectangle green 10 10 50 50");
+    std::stringstream input("rectangle 0x00FF00 10 10 50 50");
     PictureDraft draft;
     draft.AddShape(std::make_unique<MockShape>(0x00FF00));
 
@@ -148,10 +149,10 @@ TEST_F(ClientTest, EmptyInputDoesNotThrowError)
 
 TEST_F(DesignerTest, CreateDraftWithSingleShape)
 {
-    std::stringstream input("rectangle green 10 10 50 50");
+    std::stringstream input("rectangle 0x00FF00 10 10 50 50");
     auto mockShape = std::make_unique<MockShape>(0x00FF00);
 
-    EXPECT_CALL(*mockFactory, CreateShape("rectangle green 10 10 50 50")).WillOnce(Return(testing::ByMove(std::move(mockShape))));
+    EXPECT_CALL(*mockFactory, CreateShape("rectangle 0x00FF00 10 10 50 50")).WillOnce(Return(testing::ByMove(std::move(mockShape))));
 
     auto draft = designer->CreateDraft(input);
     EXPECT_EQ(draft.GetShapeCount(), 1);
@@ -159,12 +160,12 @@ TEST_F(DesignerTest, CreateDraftWithSingleShape)
 
 TEST_F(DesignerTest, CreateDraftWithMultipleShapes)
 {
-    std::stringstream input("rectangle green 10 10 50 50\ntriangle red 0 0 100 100 50 150");
+    std::stringstream input("rectangle 0x00FF00 10 10 50 50\ntriangle 0xFF0000 0 0 100 100 50 150");
     auto mockRect = std::make_unique<MockShape>(0x00FF00);
     auto mockTriangle = std::make_unique<MockShape>(0xFF0000);
 
-    EXPECT_CALL(*mockFactory, CreateShape("rectangle green 10 10 50 50")).WillOnce(Return(testing::ByMove(std::move(mockRect))));
-    EXPECT_CALL(*mockFactory, CreateShape("triangle red 0 0 100 100 50 150")).WillOnce(Return(testing::ByMove(std::move(mockTriangle))));
+    EXPECT_CALL(*mockFactory, CreateShape("rectangle 0x00FF00 10 10 50 50")).WillOnce(Return(testing::ByMove(std::move(mockRect))));
+    EXPECT_CALL(*mockFactory, CreateShape("triangle 0xFF0000 0 0 100 100 50 150")).WillOnce(Return(testing::ByMove(std::move(mockTriangle))));
 
     auto draft = designer->CreateDraft(input);
     EXPECT_EQ(draft.GetShapeCount(), 2);
@@ -180,9 +181,9 @@ TEST_F(DesignerTest, CreateDraftWithEmptyInput)
 
 TEST_F(DesignerTest, CreateDraftWithInvalidShapeThrowsException)
 {
-    std::stringstream input("invalid_shape blue 10 20");
+    std::stringstream input("invalid_shape 0x0000FF 10 20");
 
-    EXPECT_CALL(*mockFactory, CreateShape("invalid_shape blue 10 20")).WillOnce(testing::Throw(std::invalid_argument("Unknown shape type")));
+    EXPECT_CALL(*mockFactory, CreateShape("invalid_shape 0x0000FF 10 20")).WillOnce(testing::Throw(std::invalid_argument("Unknown shape type")));
 
     EXPECT_THROW({
         designer->CreateDraft(input);
@@ -191,9 +192,9 @@ TEST_F(DesignerTest, CreateDraftWithInvalidShapeThrowsException)
 
 TEST_F(DesignerTest, HandleFactoryThrowsException)
 {
-    std::stringstream input("rectangle green 10 10");
+    std::stringstream input("rectangle 0x00FF00 10 10");
 
-    EXPECT_CALL(*mockFactory, CreateShape("rectangle green 10 10")).WillOnce(testing::Throw(std::invalid_argument("Invalid parameters")));
+    EXPECT_CALL(*mockFactory, CreateShape("rectangle 0x00FF00 10 10")).WillOnce(testing::Throw(std::invalid_argument("Invalid parameters")));
 
     EXPECT_THROW({
         designer->CreateDraft(input);
@@ -252,7 +253,7 @@ TEST_F(PainterTest, HandleCanvasThrowsException)
 
 TEST_F(ShapeFactoryTest, CreateRectangle)
 {
-    auto shape = factory.CreateShape("rectangle green 10 10 50 50");
+    auto shape = factory.CreateShape("rectangle 0x00FF00 10 10 50 50");
 
     ASSERT_NE(shape, nullptr);
     EXPECT_NE(dynamic_cast<shapes::Rectangle*>(shape.get()), nullptr);
@@ -261,7 +262,7 @@ TEST_F(ShapeFactoryTest, CreateRectangle)
 
 TEST_F(ShapeFactoryTest, CreateTriangle)
 {
-    auto shape = factory.CreateShape("triangle red 0 0 100 0 50 100");
+    auto shape = factory.CreateShape("triangle 0xFF0000 0 0 100 0 50 100");
 
     ASSERT_NE(shape, nullptr);
     EXPECT_NE(dynamic_cast<shapes::Triangle*>(shape.get()), nullptr);
@@ -270,7 +271,7 @@ TEST_F(ShapeFactoryTest, CreateTriangle)
 
 TEST_F(ShapeFactoryTest, CreateEllipse)
 {
-    auto shape = factory.CreateShape("ellipse blue 100 100 50 30");
+    auto shape = factory.CreateShape("ellipse 0x0000FF 100 100 50 30");
 
     ASSERT_NE(shape, nullptr);
     EXPECT_NE(dynamic_cast<shapes::Ellipse*>(shape.get()), nullptr);
@@ -279,7 +280,7 @@ TEST_F(ShapeFactoryTest, CreateEllipse)
 
 TEST_F(ShapeFactoryTest, CreateLine)
 {
-    auto shape = factory.CreateShape("line yellow 0 0 100 100");
+    auto shape = factory.CreateShape("line 0xFFFF00 0 0 100 100");
 
     ASSERT_NE(shape, nullptr);
 
@@ -297,11 +298,11 @@ TEST_F(ShapeFactoryTest, CreateUnknownShapeThrowsException)
 TEST_F(ShapeFactoryTest, CreateShapeWithInvalidParameterCountThrowsException)
 {
     EXPECT_THROW({
-        factory.CreateShape("rectangle green 10 10");
+        factory.CreateShape("rectangle 0x00FF00 10 10");
     }, std::invalid_argument);
 
     EXPECT_THROW({
-        factory.CreateShape("triangle red 0 0 100 0 50");
+        factory.CreateShape("triangle 0xFF0000 0 0 100 0 50");
     }, std::invalid_argument);
 }
 
@@ -327,8 +328,8 @@ TEST_F(PictureDraftTest, GetShapeWithValidIndexReturnsCorrectShape)
     draft.AddShape(std::move(mockShape1));
     draft.AddShape(std::move(mockShape2));
 
-    EXPECT_EQ(&draft.GetShape(0), shape1Ptr);
-    EXPECT_EQ(&draft.GetShape(1), shape2Ptr);
+    EXPECT_EQ(draft.GetShape(0), shape1Ptr);
+    EXPECT_EQ(draft.GetShape(1), shape2Ptr);
 }
 
 TEST_F(PictureDraftTest, GetShapeWithInvalidIndexThrowsException)
