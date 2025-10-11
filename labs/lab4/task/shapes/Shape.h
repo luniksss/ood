@@ -1,15 +1,13 @@
 #ifndef SHAPE_H
 #define SHAPE_H
 #include "../canvas/ICanvas.h"
-#include <string>
-#include <regex>
 
 namespace shapes
 {
 class Shape
 {
 public:
-    Shape(const uint32_t color)
+    explicit Shape(const uint32_t color)
       : m_color(color)
     {}
 
@@ -25,7 +23,7 @@ public:
         m_color = color;
     }
 
-    ~Shape() = default;
+    virtual ~Shape() = default;
 private:
     uint32_t m_color;
 };

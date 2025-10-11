@@ -11,7 +11,7 @@ class Rectangle: public Shape
 {
 public:
     Rectangle(
-        const uint8_t color,
+        const uint32_t color,
         const Point topLeftPoint,
         const double width,
         const double height
@@ -41,9 +41,9 @@ public:
         return m_height;
     }
 
-    void Draw(ICanvas& canvas, const uint8_t color) const override
+    void Draw(ICanvas& canvas) const override
     {
-        canvas.SetColor(color);
+        canvas.SetColor(GetColor());
         canvas.DrawRectangle(m_topLeftPoint, m_width, m_height);
     }
 

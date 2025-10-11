@@ -11,7 +11,7 @@ class Ellipse: public Shape
 {
 public:
     Ellipse(
-        const uint8_t color,
+        const uint32_t color,
         const Point center,
         const double radiusX,
         const double radiusY
@@ -41,9 +41,9 @@ public:
       return m_radiusY;
     }
 
-    void Draw(ICanvas& canvas, uint8_t color) const override
+    void Draw(ICanvas& canvas) const override
     {
-        canvas.SetColor(color);
+        canvas.SetColor(GetColor());
         canvas.DrawEllipse(m_centerPoint.m_x, m_centerPoint.m_y, m_radiusX, m_radiusY);
     }
 private:

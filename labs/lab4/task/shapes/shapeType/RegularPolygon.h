@@ -10,7 +10,7 @@ class RegularPolygon final : public Shape
 {
 public:
     RegularPolygon(
-        const uint8_t color,
+        const uint32_t color,
         const Point center,
         const int vertexCount,
         const double radius

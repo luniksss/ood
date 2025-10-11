@@ -10,7 +10,7 @@ class Line: public Shape
 {
 public:
     Line(
-        const uint8_t color,
+        const uint32_t color,
         const Point start,
         const Point end
     ):  Shape(color),

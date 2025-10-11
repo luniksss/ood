@@ -12,7 +12,7 @@ class Triangle: public Shape
 {
 public:
     Triangle(
-        const uint8_t color,
+        const uint32_t color,
         const Point vertex1,
         const Point vertex2,
         const Point vertex3
@@ -49,9 +49,9 @@ public:
         return m_vertex3;
     }
 
-    void Draw(ICanvas& canvas, const uint8_t color) const override
+    void Draw(ICanvas& canvas) const override
     {
-        canvas.SetColor(color);
+        canvas.SetColor(GetColor());
         canvas.DrawTriangle(m_vertex1, m_vertex2, m_vertex3);
     }
 

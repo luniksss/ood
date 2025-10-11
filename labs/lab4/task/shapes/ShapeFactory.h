@@ -6,18 +6,17 @@
 #include "./shapeType/Rectangle.h"
 #include "./shapeType/RegularPolygon.h"
 #include "./shapeType/Triangle.h"
-#include <iostream>
 #include <memory>
 
 class ShapeFactory : public IShapeFactory
 {
 public:
-    std::unique_ptr<shapes::Shape> CreateShape(std::string description)
+    std::unique_ptr<shapes::Shape> CreateShape(std::string description) override
     {
         std::istringstream line(description);
         std::string color, shapeName;
         line >> shapeName >> color;
-        uint8_t parsedColor = ParseColor(color);
+        const uint32_t parsedColor = ParseColor(color);
 
         if (shapeName == "ellipse")
         {
@@ -44,7 +43,7 @@ public:
     }
 
 private:
-    uint8_t ParseColor(std::string color)
+    static uint32_t ParseColor(std::string color)
     {
         try
         {
@@ -53,7 +52,7 @@ private:
                 color = color.substr(1);
             }
 
-            uint8_t parsedColor = std::stoul(color, nullptr, 16);
+            const uint32_t parsedColor = std::stoul(color, nullptr, 16);
             return parsedColor;
         }
         catch (std::exception const& e)
@@ -62,7 +61,7 @@ private:
         }
     }
 
-std::unique_ptr<shapes::Ellipse> CreateEllipse(uint8_t color, std::istream& iss)
+static std::unique_ptr<shapes::Ellipse> CreateEllipse(uint32_t color, std::istream& iss)
 {
     double centerX, centerY, radiusX, radiusY;
     if (!(iss >> centerX >> centerY >> radiusX >> radiusY))
@@ -74,7 +73,7 @@ std::unique_ptr<shapes::Ellipse> CreateEllipse(uint8_t color, std::istream& iss)
     return std::make_unique<shapes::Ellipse>(color, centerPoint, radiusX, radiusY);
 }
 
-std::unique_ptr<shapes::Line> CreateLine(uint8_t color, std::istream& iss)
+static std::unique_ptr<shapes::Line> CreateLine(uint32_t color, std::istream& iss)
 {
     double startX, startY, endX, endY;
     if (!(iss >> startX >> endX >> startY >> endY))
@@ -88,7 +87,7 @@ std::unique_ptr<shapes::Line> CreateLine(uint8_t color, std::istream& iss)
     return std::make_unique<shapes::Line>(color, startPoint, endPoint);
 }
 
-std::unique_ptr<shapes::Rectangle> CreateRectangle(uint8_t color, std::istream& iss)
+static std::unique_ptr<shapes::Rectangle> CreateRectangle(uint32_t color, std::istream& iss)
 {
     double leftTopX, leftTopY, height, width;
     if (!(iss >> leftTopX >> leftTopY >> height >> width))
@@ -100,7 +99,7 @@ std::unique_ptr<shapes::Rectangle> CreateRectangle(uint8_t color, std::istream& 
     return std::make_unique<shapes::Rectangle>(color, leftTopPoint, width, height);
 }
 
-std::unique_ptr<shapes::RegularPolygon> CreateRegularPolygon(uint8_t color, std::istream& iss)
+static std::unique_ptr<shapes::RegularPolygon> CreateRegularPolygon(uint32_t color, std::istream& iss)
 {
     int vertexCount;
     double centerX, centerY, radius;
@@ -116,7 +115,7 @@ std::unique_ptr<shapes::RegularPolygon> CreateRegularPolygon(uint8_t color, std:
     return std::make_unique<shapes::RegularPolygon>(color, shapes::Point(centerX, centerY), vertexCount, radius);
 }
 
-std::unique_ptr<shapes::Triangle> CreateTriangle(uint8_t color, std::istream& iss)
+static std::unique_ptr<shapes::Triangle> CreateTriangle(uint32_t color, std::istream& iss)
 {
     double vertex1X, vertex1Y, vertex2X, vertex2Y, vertex3X, vertex3Y;
     if (!(iss >> vertex1X >> vertex1Y >> vertex2X >> vertex2Y >> vertex3X >> vertex3Y))

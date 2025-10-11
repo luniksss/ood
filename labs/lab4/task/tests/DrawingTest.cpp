@@ -1,8 +1,9 @@
 #include <gtest/gtest.h>
 #include <gmock/gmock.h>
+#include "../shapes/Point.h"
+#include "../shapes/Shape.h"
+#include "../shapes/ShapeFactory.h"
 
-using namespace shapes;
-using namespace gfx;
 using ::testing::_;
 using ::testing::Return;
 using ::testing::Invoke;
@@ -22,22 +23,24 @@ public:
 class MockCanvas : public ICanvas
 {
 public:
-    MOCK_METHOD(void, SetColor, (Color color), (override));
-    MOCK_METHOD(void, DrawLine, (const Point& from, const Point& to), (override));
-    MOCK_METHOD(void, DrawEllipse, (const Point& center, double rx, double ry), (override));
+    MOCK_METHOD(void, SetColor, (uint32_t color), (override));
+    MOCK_METHOD(void, DrawLine, (const shapes::Point& from, const shapes::Point& to), (override));
+    MOCK_METHOD(void, DrawEllipse, (const shapes::Point& center, double rx, double ry), (override));
 };
 
 class MockShapeFactory : public IShapeFactory
 {
 public:
-    MOCK_METHOD(std::unique_ptr<Shape>, CreateShape, (const std::string& descr), (override));
+    MOCK_METHOD(std::unique_ptr<shapes::Shape>, CreateShape, (std::string descr), (override));
 };
 
-class MockShape : public Shape
+class MockShape : public shapes::Shape
 {
 public:
+    MockShape(uint32_t color = 0) : Shape(color) {}
+
     MOCK_METHOD(void, Draw, (ICanvas* canvas), (override));
-    MOCK_METHOD(Color, GetColor, (), (override, const));
+    MOCK_METHOD(uint8_t, GetColor, (), (const));
 };
 
 class ClientTest : public testing::Test
@@ -94,7 +97,7 @@ TEST_F(ClientTest, ValidInputCreatesDesignerAndPainter)
 {
     std::stringstream input("rectangle green 10 10 50 50");
     PictureDraft draft;
-    draft.AddShape(std::make_unique<MockShape>());
+    draft.AddShape(std::make_unique<MockShape>(0x00FF00));
 
     EXPECT_CALL(*mockDesigner, CreateDraft(_)).WillOnce(Return(draft));
     EXPECT_CALL(*mockPainter, DrawPicture(draft, mockCanvas.get()));
@@ -118,7 +121,7 @@ TEST_F(ClientTest, ClientHandlePainterError)
 {
     std::stringstream input("rectangle green 10 10 50 50");
     PictureDraft draft;
-    draft.AddShape(std::make_unique<MockShape>()));
+    draft.AddShape(std::make_unique<MockShape>(0x00FF00));
 
     EXPECT_CALL(*mockDesigner, CreateDraft(_)).WillOnce(Return(draft));
     EXPECT_CALL(*mockPainter, DrawPicture(_, _)).WillOnce(testing::Throw(std::runtime_error("Canvas error")));
@@ -146,7 +149,7 @@ TEST_F(ClientTest, EmptyInputDoesNotThrowError)
 TEST_F(DesignerTest, CreateDraftWithSingleShape)
 {
     std::stringstream input("rectangle green 10 10 50 50");
-    auto mockShape = std::make_unique<MockShape>();
+    auto mockShape = std::make_unique<MockShape>(0x00FF00);
 
     EXPECT_CALL(*mockFactory, CreateShape("rectangle green 10 10 50 50")).WillOnce(Return(testing::ByMove(std::move(mockShape))));
 
@@ -157,8 +160,8 @@ TEST_F(DesignerTest, CreateDraftWithSingleShape)
 TEST_F(DesignerTest, CreateDraftWithMultipleShapes)
 {
     std::stringstream input("rectangle green 10 10 50 50\ntriangle red 0 0 100 100 50 150");
-    auto mockRect = std::make_unique<MockShape>();
-    auto mockTriangle = std::make_unique<MockShape>();
+    auto mockRect = std::make_unique<MockShape>(0x00FF00);
+    auto mockTriangle = std::make_unique<MockShape>(0xFF0000);
 
     EXPECT_CALL(*mockFactory, CreateShape("rectangle green 10 10 50 50")).WillOnce(Return(testing::ByMove(std::move(mockRect))));
     EXPECT_CALL(*mockFactory, CreateShape("triangle red 0 0 100 100 50 150")).WillOnce(Return(testing::ByMove(std::move(mockTriangle))));
@@ -199,9 +202,9 @@ TEST_F(DesignerTest, HandleFactoryThrowsException)
 
 TEST_F(PainterTest, DrawPictureWithSingleShape)
 {
-    auto mockShape = std::make_unique<MockShape>();
+    auto mockShape = std::make_unique<MockShape>(0x00FF00);
     EXPECT_CALL(*mockShape, Draw(&mockCanvas)).Times(1);
-    EXPECT_CALL(*mockShape, GetColor()).WillOnce(Return(Color::Green));
+    EXPECT_CALL(*mockShape, GetColor()).WillOnce(Return(0x00FF00));
 
     draft.AddShape(std::move(mockShape));
 
@@ -210,14 +213,14 @@ TEST_F(PainterTest, DrawPictureWithSingleShape)
 
 TEST_F(PainterTest, DrawPictureWithMultipleShapes)
 {
-    auto mockShape1 = std::make_unique<MockShape>();
-    auto mockShape2 = std::make_unique<MockShape>();
+    auto mockShape1 = std::make_unique<MockShape>(0xFF0000);
+    auto mockShape2 = std::make_unique<MockShape>(0x0000FF);
 
     EXPECT_CALL(*mockShape1, Draw(&mockCanvas)).Times(1);
-    EXPECT_CALL(*mockShape1, GetColor()).WillOnce(Return(Color::Red));
+    EXPECT_CALL(*mockShape1, GetColor()).WillOnce(Return(0xFF0000));
 
     EXPECT_CALL(*mockShape2, Draw(&mockCanvas)).Times(1);
-    EXPECT_CALL(*mockShape2, GetColor()).WillOnce(Return(Color::Blue));
+    EXPECT_CALL(*mockShape2, GetColor()).WillOnce(Return(0x0000FF));
 
     draft.AddShape(std::move(mockShape1));
     draft.AddShape(std::move(mockShape2));
@@ -236,9 +239,9 @@ TEST_F(PainterTest, DrawPictureWithEmptyDraft)
 
 TEST_F(PainterTest, HandleCanvasThrowsException)
 {
-    auto mockShape = std::make_unique<MockShape>();
+    auto mockShape = std::make_unique<MockShape>(0x00FF00);
     EXPECT_CALL(*mockShape, Draw(&mockCanvas)).WillOnce(testing::Throw(std::runtime_error("Canvas error")));
-    EXPECT_CALL(*mockShape, GetColor()).WillOnce(Return(Color::Green));
+    EXPECT_CALL(*mockShape, GetColor()).WillOnce(Return(0x00FF00));
 
     draft.AddShape(std::move(mockShape));
 
@@ -252,8 +255,8 @@ TEST_F(ShapeFactoryTest, CreateRectangle)
     auto shape = factory.CreateShape("rectangle green 10 10 50 50");
 
     ASSERT_NE(shape, nullptr);
-    EXPECT_NE(dynamic_cast<Rectangle*>(shape.get()), nullptr);
-    EXPECT_EQ(shape->GetColor(), Color::Green);
+    EXPECT_NE(dynamic_cast<shapes::Rectangle*>(shape.get()), nullptr);
+    EXPECT_EQ(shape->GetColor(), 0x00FF00);
 }
 
 TEST_F(ShapeFactoryTest, CreateTriangle)
@@ -261,8 +264,8 @@ TEST_F(ShapeFactoryTest, CreateTriangle)
     auto shape = factory.CreateShape("triangle red 0 0 100 0 50 100");
 
     ASSERT_NE(shape, nullptr);
-    EXPECT_NE(dynamic_cast<Triangle*>(shape.get()), nullptr);
-    EXPECT_EQ(shape->GetColor(), Color::Red);
+    EXPECT_NE(dynamic_cast<shapes::Triangle*>(shape.get()), nullptr);
+    EXPECT_EQ(shape->GetColor(), 0xFF0000);
 }
 
 TEST_F(ShapeFactoryTest, CreateEllipse)
@@ -270,8 +273,8 @@ TEST_F(ShapeFactoryTest, CreateEllipse)
     auto shape = factory.CreateShape("ellipse blue 100 100 50 30");
 
     ASSERT_NE(shape, nullptr);
-    EXPECT_NE(dynamic_cast<Ellipse*>(shape.get()), nullptr);
-    EXPECT_EQ(shape->GetColor(), Color::Blue);
+    EXPECT_NE(dynamic_cast<shapes::Ellipse*>(shape.get()), nullptr);
+    EXPECT_EQ(shape->GetColor(), 0x0000FF);
 }
 
 TEST_F(ShapeFactoryTest, CreateLine)
@@ -280,8 +283,8 @@ TEST_F(ShapeFactoryTest, CreateLine)
 
     ASSERT_NE(shape, nullptr);
 
-    EXPECT_NE(dynamic_cast<Line*>(shape.get()), nullptr);
-    EXPECT_EQ(shape->GetColor(), Color::Yellow);
+    EXPECT_NE(dynamic_cast<shapes::Line*>(shape.get()), nullptr);
+    EXPECT_EQ(shape->GetColor(), 0xFFFF00);
 }
 
 TEST_F(ShapeFactoryTest, CreateUnknownShapeThrowsException)
