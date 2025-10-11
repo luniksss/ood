@@ -6,6 +6,10 @@
 #include "./shapeType/Rectangle.h"
 #include "./shapeType/RegularPolygon.h"
 #include "./shapeType/Triangle.h"
+#include <sstream>
+#include <iostream>
+#include <string>
+#include <cmath>
 #include <memory>
 
 class ShapeFactory : public IShapeFactory

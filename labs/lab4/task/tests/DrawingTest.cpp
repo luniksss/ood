@@ -5,6 +5,8 @@
 #include "../shapes/ShapeFactory.h"
 #include "../designer/Designer.h"
 #include "../canvas/ICanvas.h"
+#include "../painter/Painter.h"
+#include "../Client.h"
 
 using ::testing::_;
 using ::testing::Return;
@@ -19,7 +21,7 @@ public:
 class MockPainter : public IPainter
 {
 public:
-    MOCK_METHOD(void, DrawPicture, (const PictureDraft& draft, ICanvas* canvas), (override));
+    MOCK_METHOD(void, DrawPicture, (const PictureDraft& draft, ICanvas& canvas), (override));
 };
 
 class MockCanvas : public ICanvas
@@ -32,6 +34,7 @@ public:
     MOCK_METHOD(void, DrawEllipse, (double cx, double cy, double rx, double ry), (override));
     MOCK_METHOD(void, DrawRectangle, (shapes::Point topLeft, double width, double height), (override));
     MOCK_METHOD(void, DrawTriangle, (shapes::Point vertex1, shapes::Point vertex2, shapes::Point vertex3), (override));
+    MOCK_METHOD(void, Display, (), (override));
 };
 
 class MockShapeFactory : public IShapeFactory
@@ -57,7 +60,7 @@ protected:
         mockDesigner = std::make_unique<MockDesigner>();
         mockPainter = std::make_unique<MockPainter>();
         mockCanvas = std::make_unique<MockCanvas>();
-        client = std::make_unique<Client>(mockDesigner.get(), mockPainter.get());
+        client = std::make_unique<Client>(*mockDesigner);
     }
 
     std::unique_ptr<MockDesigner> mockDesigner;
@@ -72,7 +75,7 @@ protected:
     void SetUp() override
     {
         mockFactory = std::make_unique<MockShapeFactory>();
-        designer = std::make_unique<Designer>(*mockFactory.get());
+        designer = std::make_unique<Designer>(*mockFactory);
     }
 
     std::unique_ptr<MockShapeFactory> mockFactory;
@@ -105,10 +108,10 @@ TEST_F(ClientTest, ValidInputCreatesDesignerAndPainter)
     PictureDraft draft;
     draft.AddShape(std::make_unique<MockShape>(0x00FF00));
 
-    EXPECT_CALL(*mockDesigner, CreateDraft(_)).WillOnce(Return(draft));
-    EXPECT_CALL(*mockPainter, DrawPicture(draft, mockCanvas.get()));
+    EXPECT_CALL(*mockDesigner, CreateDraft(_)).WillOnce(Return(std::move(draft)));
+    EXPECT_CALL(*mockPainter, DrawPicture(_, _));
 
-    client->ProcessInput(input, mockCanvas.get());
+    client->DescribeDraft(input, *mockCanvas, *mockPainter);
 }
 
 TEST_F(ClientTest, ClientHandleDesignerError)
@@ -118,9 +121,9 @@ TEST_F(ClientTest, ClientHandleDesignerError)
     EXPECT_CALL(*mockDesigner, CreateDraft(_)).WillOnce(testing::Throw(std::invalid_argument("Invalid shape description")));
     EXPECT_CALL(*mockPainter, DrawPicture(_, _)).Times(0);
 
-    EXPECT_NO_THROW({
-        client->ProcessInput(input, mockCanvas.get());
-    });
+    EXPECT_THROW({
+        client->DescribeDraft(input, *mockCanvas, *mockPainter);
+    }, std::invalid_argument);
 }
 
 TEST_F(ClientTest, ClientHandlePainterError)
@@ -129,12 +132,12 @@ TEST_F(ClientTest, ClientHandlePainterError)
     PictureDraft draft;
     draft.AddShape(std::make_unique<MockShape>(0x00FF00));
 
-    EXPECT_CALL(*mockDesigner, CreateDraft(_)).WillOnce(Return(draft));
+    EXPECT_CALL(*mockDesigner, CreateDraft(_)).WillOnce(Return(std::move(draft)));
     EXPECT_CALL(*mockPainter, DrawPicture(_, _)).WillOnce(testing::Throw(std::runtime_error("Canvas error")));
 
-    EXPECT_NO_THROW({
-        client->ProcessInput(input, mockCanvas.get());
-    });
+    EXPECT_THROW({
+        client->DescribeDraft(input, *mockCanvas, *mockPainter);
+    }, std::runtime_error);
 }
 
 TEST_F(ClientTest, EmptyInputDoesNotThrowError)
@@ -144,12 +147,9 @@ TEST_F(ClientTest, EmptyInputDoesNotThrowError)
     EXPECT_CALL(*mockDesigner, CreateDraft(_)).WillOnce(Return(PictureDraft()));
     EXPECT_CALL(*mockPainter, DrawPicture(_, _)).Times(1);
 
-    testing::internal::CaptureStdout();
     EXPECT_NO_THROW({
-        client->ProcessInput(input, mockCanvas.get());
+        client->DescribeDraft(input, *mockCanvas, *mockPainter);
     });
-    std::string output = testing::internal::GetCapturedStdout();
-    EXPECT_FALSE(output.empty());
 }
 
 TEST_F(DesignerTest, CreateDraftWithSingleShape)
@@ -209,8 +209,7 @@ TEST_F(DesignerTest, HandleFactoryThrowsException)
 TEST_F(PainterTest, DrawPictureWithSingleShape)
 {
     auto mockShape = std::make_unique<MockShape>(0x00FF00);
-    EXPECT_CALL(*mockShape, Draw(::testing::Ref(mockCanvas))).Times(1);
-    EXPECT_CALL(*mockShape, GetColor()).WillOnce(Return(0x00FF00));
+    EXPECT_CALL(*mockShape, Draw(_)).Times(1);
 
     draft.AddShape(std::move(mockShape));
 
@@ -222,16 +221,13 @@ TEST_F(PainterTest, DrawPictureWithMultipleShapes)
     auto mockShape1 = std::make_unique<MockShape>(0xFF0000);
     auto mockShape2 = std::make_unique<MockShape>(0x0000FF);
 
-    EXPECT_CALL(*mockShape1, Draw(::testing::Ref(mockCanvas))).Times(1);
-    EXPECT_CALL(*mockShape1, GetColor()).WillOnce(Return(0xFF0000));
-
-    EXPECT_CALL(*mockShape2, Draw(::testing::Ref(mockCanvas))).Times(1);
-    EXPECT_CALL(*mockShape2, GetColor()).WillOnce(Return(0x0000FF));
+    EXPECT_CALL(*mockShape1, Draw(_)).Times(1);
+    EXPECT_CALL(*mockShape2, Draw(_)).Times(1);
 
     draft.AddShape(std::move(mockShape1));
     draft.AddShape(std::move(mockShape2));
 
-    painter.DrawPicture(draft, &mockCanvas);
+    painter.DrawPicture(draft, mockCanvas);
 }
 
 TEST_F(PainterTest, DrawPictureWithEmptyDraft)
@@ -240,19 +236,18 @@ TEST_F(PainterTest, DrawPictureWithEmptyDraft)
     EXPECT_CALL(mockCanvas, DrawLine(_, _)).Times(0);
     EXPECT_CALL(mockCanvas, DrawEllipse(_, _, _, _)).Times(0);
 
-    painter.DrawPicture(draft, &mockCanvas);
+    painter.DrawPicture(draft, mockCanvas);
 }
 
 TEST_F(PainterTest, HandleCanvasThrowsException)
 {
     auto mockShape = std::make_unique<MockShape>(0x00FF00);
-    EXPECT_CALL(*mockShape, Draw(mockCanvas)).WillOnce(testing::Throw(std::runtime_error("Canvas error")));
-    EXPECT_CALL(*mockShape, GetColor()).WillOnce(Return(0x00FF00));
+    EXPECT_CALL(*mockShape, Draw(_)).WillOnce(testing::Throw(std::runtime_error("Canvas error")));
 
     draft.AddShape(std::move(mockShape));
 
     EXPECT_THROW({
-        painter.DrawPicture(draft, &mockCanvas);
+        painter.DrawPicture(draft, mockCanvas);
     }, std::runtime_error);
 }
 

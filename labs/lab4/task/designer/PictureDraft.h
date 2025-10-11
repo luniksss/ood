@@ -2,6 +2,7 @@
 #define PICTUREDRAFT_H
 #include <memory>
 #include <vector>
+#include "../shapes/Shape.h"
 
 class PictureDraft
 {
@@ -24,6 +25,19 @@ public:
         }
         throw std::out_of_range("index out of range");
     }
+
+    auto begin() const
+    {
+        return m_shapes.begin();
+    }
+
+    auto end() const
+    {
+        return m_shapes.end();
+    }
+
+    auto begin() { return m_shapes.begin(); }
+    auto end() { return m_shapes.end(); }
 
 private:
     std::vector<std::unique_ptr<shapes::Shape>> m_shapes;

@@ -1,6 +1,9 @@
 #ifndef DESIGNER_H
 #define DESIGNER_H
 #include "./IDesigner.h"
+#include "../shapes/IShapeFactory.h"
+#include <iostream>
+#include <string>
 
 class Designer: public IDesigner
 {
@@ -18,6 +21,10 @@ public:
             if (line == "draw")
             {
                 break;
+            }
+            if (line.empty())
+            {
+                continue;
             }
             draft.AddShape(m_factory.CreateShape(line));
         }

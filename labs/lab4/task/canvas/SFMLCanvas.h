@@ -74,19 +74,19 @@ public:
         m_texture.draw(triangle);
     }
 
-//    void Display() override
-//    {
-//        sf::Event event{};
-//        while (m_window.pollEvent(event))
-//        {
-//        if (event.type == sf::Event::Closed)
-//          m_window.close();
-//        }
-//        m_texture.display();
-//        const sf::Sprite sprite(m_texture.getTexture());
-//        m_window.draw(sprite);
-//        m_window.display();
-//    }
+    void Display() override
+    {
+        sf::Event event{};
+        while (m_window.pollEvent(event))
+        {
+        if (event.type == sf::Event::Closed)
+          m_window.close();
+        }
+        m_texture.display();
+        const sf::Sprite sprite(m_texture.getTexture());
+        m_window.draw(sprite);
+        m_window.display();
+    }
 
 private:
     sf::RenderWindow& m_window;
