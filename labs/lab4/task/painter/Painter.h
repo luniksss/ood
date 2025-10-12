@@ -11,6 +11,7 @@ public:
         {
             shape->Draw(canvas);
         }
+        canvas.Display();
     }
 };
 
