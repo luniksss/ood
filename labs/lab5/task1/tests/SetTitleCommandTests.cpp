@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <string>
 #include <vector>
+#include "../document/command/SetTitleCommand.h"
 
 class Document
 {
@@ -14,91 +15,77 @@ public:
         return m_title;
     }
 
+    std::string& GetTitleRef()
+    {
+        return m_title;
+    }
 private:
     std::string m_title;
-};
-
-class SetTitleCommand
-{
-public:
-    SetTitleCommand(Document& doc, const std::string& newTitle)
-        : m_document(doc),
-        m_newTitle(newTitle),
-        m_oldTitle(doc.GetTitle())
-    {}
-
-    void Execute()
-    {
-        m_document.SetTitle(m_newTitle);
-    }
-
-    void Unexecute()
-    {
-        m_document.SetTitle(m_oldTitle);
-    }
-
-    bool MergeWith(const SetTitleCommand& other)
-    {
-        if (&m_document != &other.m_document) return false;
-        m_newTitle = other.m_newTitle;
-        return true;
-    }
-
-    std::string GetNewTitle() const
-    {
-        return m_newTitle;
-    }
-
-private:
-    Document& m_document;
-    std::string m_newTitle;
-    std::string m_oldTitle;
 };
 
 class SetTitleCommandTests : public ::testing::Test
 {
 protected:
+    void SetUp() override
+    {
+        doc.SetTitle("Old Title");
+    }
+
     Document doc;
-    std::vector<SetTitleCommand> commandHistory;
 };
 
 TEST_F(SetTitleCommandTests, ExecuteChangesTitle)
 {
-    SetTitleCommand cmd(doc, "New Title");
+    SetTitleCommand cmd(doc.GetTitleRef(), "New Title");
     cmd.Execute();
     EXPECT_EQ(doc.GetTitle(), "New Title");
 }
 
 TEST_F(SetTitleCommandTests, UndoRestoresOldTitle)
 {
-    doc.SetTitle("Old Title");
-    SetTitleCommand cmd(doc, "New Title");
+    SetTitleCommand cmd(doc.GetTitleRef(), "New Title");
     cmd.Execute();
+    EXPECT_EQ(doc.GetTitle(), "New Title");
+
     cmd.Unexecute();
     EXPECT_EQ(doc.GetTitle(), "Old Title");
 }
 
-TEST_F(SetTitleCommandTests, SequentialCommandsMerge)
+TEST_F(SetTitleCommandTests, MultipleExecuteUnexecuteCycles)
 {
-    doc.SetTitle("Original");
-    SetTitleCommand firstCmd(doc, "Title1");
-    SetTitleCommand secondCmd(doc, "Title2");
+    SetTitleCommand cmd(doc.GetTitleRef(), "New Title");
+
+    cmd.Execute();
+    EXPECT_EQ(doc.GetTitle(), "New Title");
+    cmd.Unexecute();
+    EXPECT_EQ(doc.GetTitle(), "Old Title");
+
+    cmd.Execute();
+    EXPECT_EQ(doc.GetTitle(), "New Title");
+    cmd.Unexecute();
+    EXPECT_EQ(doc.GetTitle(), "Old Title");
+}
+
+TEST_F(SetTitleCommandTests, MergeWithDifferentTargetFails)
+{
+    std::string otherTitle = "Other Title";
+
+    SetTitleCommand firstCmd(doc.GetTitleRef(), "Title1");
+    SetTitleCommand secondCmd(otherTitle, "Title2");
 
     firstCmd.Execute();
     EXPECT_EQ(doc.GetTitle(), "Title1");
 
     bool merged = firstCmd.MergeWith(secondCmd);
-    EXPECT_TRUE(merged);
-    firstCmd.Execute();
-    EXPECT_EQ(doc.GetTitle(), "Title2");
+    EXPECT_FALSE(merged);
 }
 
-TEST_F(SetTitleCommandTests, MergeFailsIfDifferentDocuments)
+TEST_F(SetTitleCommandTests, EmptyTitleWorks)
 {
-    Document otherDoc;
-    SetTitleCommand firstCmd(doc, "Title1");
-    SetTitleCommand otherCmd(otherDoc, "Title2");
+    SetTitleCommand cmd(doc.GetTitleRef(), "");
+    cmd.Execute();
+    EXPECT_EQ(doc.GetTitle(), "");
 
-    bool merged = firstCmd.MergeWith(otherCmd);
-    EXPECT_FALSE(merged);
+    cmd.Unexecute();
+    EXPECT_EQ(doc.GetTitle(), "Old Title");
 }
